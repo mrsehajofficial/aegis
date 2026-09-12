@@ -1,0 +1,112 @@
+""""""
+Anti-spam domain — combined checker for flood and spam.
+
+Usage in a message handler:
+    from app.anti_spam import AntiSpamChecker
+    checker = AntiSpamChecker(context, chat_id, group_settings)
+    action = await checker.check_message(message)
+    # action is None if clean, or a string describing the action taken
+"""
+import logging
+from dataclasses import dataclass
+from datetime import timedelta
+from typing import Optional
+
+from telegram import Message
+from telegram.ext import ContextTypes
+
+from app.anti_spam.flood import check_flood, reset_user
+from app.anti_spam.detector import check_spam, count_urls, count_mentions
+from app.anti_spam.actions import delete_message_safely, mute_user, ban_user
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class GroupProtectionSettings:
+    anti_flood_enabled: bool = False
+    anti_spam_enabled: bool = False
+    flood_msg_limit: int = 5
+    flood_window_seconds: float = 3.0
+    flood_mute_minutes: int = 5
+    spam_action: str = "delete"  # delete | warn | mute | ban
+
+
+class AntiSpamChecker:
+    """Combined flood + spam checker for group messages."""
+
+    def __init__(
+        self,
+        context: ContextTypes.DEFAULT_TYPE,
+        chat_id: int,
+        settings: GroupProtectionSettings,
+    ):
+        self.context = context
+        self.chat_id = chat_id
+        self.settings = settings
+
+    async def check_message(self, message: Message) -> Optional[str]:
+        """
+        Run flood and spam checks on a message.
+        Returns a string describing the action taken, or None if message is clean.
+        """
+        if not message or not message.from_user:
+            return None
+
+        user_id = message.from_user.id
+        text = message.text or message.caption or ""
+
+        # ── Flood check ──────────────────────────────────────────────
+        if self.settings.anti_flood_enabled:
+            if check_flood(
+                self.chat_id, user_id,
+                self.settings.flood_msg_limit,
+                self.settings.flood_window_seconds,
+            ):
+                reset_user(self.chat_id, user_id)
+                muted = await mute_user(
+                    self.context, self.chat_id, user_id,
+                    timedelta(minutes=self.settings.flood_mute_minutes),
+                )
+                await delete_message_safely(message)
+                if muted:
+                    logger.info(f"Flood: muted user {user_id} in chat {self.chat_id}")
+                    return "flood_mute"
+                return "flood_detected"
+
+        # ── Spam check ───────────────────────────────────────────────
+        if self.settings.anti_spam_enabled and text:
+            url_count = count_urls(text)
+            mention_count = count_mentions(text)
+            has_forward = message.forward_date is not None
+
+            result = check_spam(text, has_forward, url_count, mention_count)
+            if result.is_spam:
+                action_taken = await self._handle_spam(message, result.reasons)
+                return action_taken
+
+        return None
+
+    async def _handle_spam(self, message: Message, reasons: list) -> str:
+        """Handle a spam message based on configured action."""
+        action = self.settings.spam_action
+        user_id = message.from_user.id
+
+        if action == "delete":
+            await delete_message_safely(message)
+            return "spam_deleted"
+        elif action == "mute":
+            await delete_message_safely(message)
+            muted = await mute_user(self.context, self.chat_id, user_id)
+            if muted:
+                return "spam_muted"
+            return "spam_detected"
+        elif action == "ban":
+            await delete_message_safely(message)
+            banned = await ban_user(self.context, self.chat_id, user_id)
+            if banned:
+                return "spam_banned"
+            return "spam_detected"
+        else:
+            await delete_message_safely(message)
+            return "spam_deleted""""
