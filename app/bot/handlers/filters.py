@@ -1,5 +1,5 @@
 """
-filters.py — Yuki keyword auto-reply filters.
+filters.py — Aegis keyword auto-reply filters.
 """
 import html
 import logging

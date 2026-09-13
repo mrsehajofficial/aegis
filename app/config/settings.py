@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./aegis.db"
     LOG_LEVEL: str = "INFO"
     SUPER_ADMIN_IDS: List[int] = []
-    BOT_NAME: str = "Yuki"
+    BOT_NAME: str = "Aegis"
     WARN_ACTION: str = "mute"  # action on warn-limit reach: "mute" | "ban" | "kick"
 
     @field_validator("SUPER_ADMIN_IDS", mode="before")

@@ -1,5 +1,5 @@
 """
-moderation.py — Yuki moderation commands (ban, mute, warn, pin...).
+moderation.py — Aegis moderation commands (ban, mute, warn, pin...).
 """
 import html
 import logging

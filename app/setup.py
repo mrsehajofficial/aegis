@@ -61,7 +61,7 @@ def _read_existing() -> dict:
 
 
 def main() -> None:
-    print("🧙 Yuki setup — writes a local .env (never commit it).")
+    print("🧙 Aegis setup — writes a local .env (never commit it).")
     print(f"Target: {ENV_PATH}\n")
     existing = _read_existing()
     if existing:
@@ -94,7 +94,7 @@ def main() -> None:
             break
         print("❌ Must be numbers like 111,222.")
 
-    name = _prompt("Bot display name", default=existing.get("BOT_NAME", "Yuki")) or "Yuki"
+    name = _prompt("Bot display name", default=existing.get("BOT_NAME", "Aegis")) or "Aegis"
 
     warn_action = _prompt("Action on warn-limit (mute/ban/kick)",
                           default=existing.get("WARN_ACTION", "mute")).lower() or "mute"

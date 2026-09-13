@@ -1,5 +1,5 @@
-""""""
-actions.py — Anti-spam/flood actions.
+"""
+actions.py - Anti-spam/flood actions.
 
 Handles the consequences of detected spam/flood:
 - Delete offending messages
@@ -40,7 +40,7 @@ async def mute_user(
     until = datetime.now(timezone.utc) + duration
     perms = ChatPermissions(
         can_send_messages=False,
-        can_send_media_messages=False,
+        can_send_polls=False,
         can_send_other_messages=False,
         can_add_web_page_previews=False,
     )
@@ -80,4 +80,4 @@ async def notify_admins(
     try:
         await context.bot.send_message(chat_id=chat_id, text=text)
     except Exception as e:
-        logger.debug(f"Could not notify chat {chat_id}: {e}")"""
+        logger.debug(f"Could not notify chat {chat_id}: {e}")

@@ -1,5 +1,5 @@
 """
-welcome.py — Yuki group commands: rules, welcome/goodbye, settings.
+welcome.py — Aegis group commands: rules, welcome/goodbye, settings.
 """
 import html
 import logging

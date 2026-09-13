@@ -1,5 +1,5 @@
 """
-Yuki — Main entry point for the Telegram Group Management Bot.
+Aegis — Main entry point for the Telegram Group Management Bot.
 
 Usage:
     python -m app.setup   # first-time interactive .env setup

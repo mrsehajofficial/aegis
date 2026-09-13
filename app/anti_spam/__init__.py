@@ -1,5 +1,5 @@
-""""""
-Anti-spam domain — combined checker for flood and spam.
+"""
+Anti-spam domain - combined checker for flood and spam.
 
 Usage in a message handler:
     from app.anti_spam import AntiSpamChecker
@@ -56,7 +56,7 @@ class AntiSpamChecker:
         user_id = message.from_user.id
         text = message.text or message.caption or ""
 
-        # ── Flood check ──────────────────────────────────────────────
+        # -- Flood check ----------------------------------------------
         if self.settings.anti_flood_enabled:
             if check_flood(
                 self.chat_id, user_id,
@@ -74,7 +74,7 @@ class AntiSpamChecker:
                     return "flood_mute"
                 return "flood_detected"
 
-        # ── Spam check ───────────────────────────────────────────────
+        # -- Spam check -----------------------------------------------
         if self.settings.anti_spam_enabled and text:
             url_count = count_urls(text)
             mention_count = count_mentions(text)
@@ -109,4 +109,4 @@ class AntiSpamChecker:
             return "spam_detected"
         else:
             await delete_message_safely(message)
-            return "spam_deleted""""
+            return "spam_deleted"

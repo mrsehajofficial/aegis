@@ -1,5 +1,5 @@
-""""""
-flood.py — Sliding-window flood detector.
+"""
+flood.py - Sliding-window flood detector.
 
 Tracks per-user message timestamps in a deque. When a user exceeds the
 configured message count within the time window, the flood is triggered.
@@ -59,4 +59,4 @@ def reset_group(group_id: int) -> None:
     """Clear all flood tracking for a group."""
     keys_to_remove = [k for k in _flood_store if k[0] == group_id]
     for key in keys_to_remove:
-        del _flood_store[key]"""
+        del _flood_store[key]

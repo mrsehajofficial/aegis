@@ -1,5 +1,5 @@
-""""""
-detector.py — Anti-spam detector.
+"""
+detector.py - Anti-spam detector.
 
 Checks messages for spam patterns:
 - URL flood (multiple links)
@@ -87,4 +87,4 @@ def count_mentions(text: str) -> int:
     """Count @mentions in text."""
     if not text:
         return 0
-    return len(MENTION_PATTERN.findall(text))"""
+    return len(MENTION_PATTERN.findall(text))
