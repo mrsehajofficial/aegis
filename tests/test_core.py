@@ -72,6 +72,14 @@ class TestGroupSettingsModel:
         assert GroupSettings.__table__.c.warn_limit.default.arg == 3
         assert GroupSettings.__table__.c.welcome_enabled.default.arg is False
 
+    def test_welcome_goodbye_message_columns_are_nullable_text(self):
+        from sqlalchemy import Text
+        assert GroupSettings.__table__.c.welcome_message.type is not None
+        assert GroupSettings.__table__.c.welcome_message.nullable is True
+        assert GroupSettings.__table__.c.goodbye_message.nullable is True
+        assert GroupSettings.__table__.c.welcome_message.type.__class__ is Text
+        assert GroupSettings.__table__.c.goodbye_message.type.__class__ is Text
+
 
 class TestWarningModel:
     def test_warning_creation(self):

@@ -16,3 +16,10 @@ dist/
 build/
 *.egg-info/
 .DS_Store
+
+# Frontend & Build Distribution (Landing)
+node_modules/
+landing/dist/
+landing/node_modules/
+.vite/
+*.tsbuildinfo

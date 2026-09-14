@@ -39,6 +39,7 @@ from app.bot.handlers.welcome import (
     setrules_command,
     settings_command,
     setwarnlimit_command,
+    handle_chat_member,
 )
 from app.bot.handlers.lifecycle import handle_my_chat_member
 from app.bot.handlers.errors import error_handler
@@ -144,6 +145,14 @@ def build_application() -> Application:
     # slowing them down or swallowing updates.
     app.add_handler(
         MessageHandler(ptb_filters.ALL, track_members, block=False), group=1)
+
+    # ── Member Join / Leave (welcome & goodbye messages) ──────────────────────
+    # Fires for any user/bot whose membership status changes (except the bot
+    # itself, which arrives as MY_CHAT_MEMBER and is handled in lifecycle.py).
+    app.add_handler(
+        ChatMemberHandler(handle_chat_member, ChatMemberHandler.CHAT_MEMBER, block=False),
+        group=1,
+    )
 
     # ── Bot Lifecycle (my_chat_member) ────────────────────────────────────────
     app.add_handler(ChatMemberHandler(handle_my_chat_member, ChatMemberHandler.MY_CHAT_MEMBER))

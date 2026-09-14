@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aegis: Production-grade, deterministic Telegram group management and defense shield. Impenetrable moderation, anti-flood rate-limiting, and immutable audit logs." />
+  <title>AEGIS // Deterministic Telegram Group Defense</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Procedural SVG Grain Overlay -->
+  <svg class="noise-overlay" aria-hidden="true">
+    <filter id="fractal-noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.15 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#fractal-noise)" />
+  </svg>
+
+  <!-- Technical Background Grid -->
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <!-- Persistent 3D WebGL Shield Canvas -->
+  <canvas id="webgl-canvas"></canvas>
+
+  <div class="page-wrapper">
+    <!-- Top Navigation -->
+    <header class="nav-header">
+      <a href="#" class="brand-logo">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        <span>AEGIS // BOT</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#matrix" class="nav-link">DEFENSE MATRIX</a>
+        <a href="#terminal" class="nav-link">TACTICAL SHELL</a>
+        <a href="#features" class="nav-link">CAPABILITIES</a>
+        <a href="#architecture" class="nav-link">ARCHITECTURE</a>
+        <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">
+          <span>GITHUB</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 17l9.2-9.2M17 17V7H7"/>
+          </svg>
+        </a>
+      </nav>
+
+      <div class="nav-mobile-cta">
+        <a href="#terminal" class="btn btn-primary btn-sm"><span>SHELL</span></a>
+        <button class="mobile-toggle-btn" aria-label="Toggle Navigation Menu">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Drawer Overlay & Navigation Sheet -->
+    <div class="mobile-drawer-overlay"></div>
+    <aside class="mobile-drawer">
+      <div class="mobile-drawer-header">
+        <span class="badge-tag badge-emerald">AEGIS // MATRIX</span>
+        <button class="mobile-close-btn" aria-label="Close menu">&times;</button>
+      </div>
+      <div class="mobile-drawer-links">
+        <a href="#matrix" class="mobile-drawer-link">01 // DEFENSE MATRIX</a>
+        <a href="#terminal" class="mobile-drawer-link">02 // TACTICAL SHELL</a>
+        <a href="#features" class="mobile-drawer-link">03 // CAPABILITIES</a>
+        <a href="#architecture" class="mobile-drawer-link">04 // ARCHITECTURE</a>
+      </div>
+      <div class="mobile-drawer-footer">
+        <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+          <span>GITHUB REPOSITORY</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 17l9.2-9.2M17 17V7H7"/>
+          </svg>
+        </a>
+      </div>
+    </aside>
+
+    <main>
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="hero-content">
+          <div class="badge-tag badge-emerald">
+            <span>PERIMETER SYSTEM READY // PTB V21+</span>
+          </div>
+
+          <h1 class="hero-title">
+            THE DIVINE SHIELD<br />OF ZEUS.
+          </h1>
+
+          <p class="hero-description">
+            Production-grade, deterministic Telegram group management. Engineered with 
+            Python 3.11, SQLAlchemy 2.0, and sliding-window rate limiting for impenetrable, 
+            low-latency group protection.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#terminal" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+              </svg>
+              <span>LAUNCH TACTICAL CONSOLE</span>
+            </a>
+            <a href="#matrix" class="btn btn-secondary">
+              <span>EXPLORE ARCHITECTURE</span>
+            </a>
+          </div>
+
+          <!-- Live Telemetry HUD Bar -->
+          <div class="telemetry-grid" style="width: 100%; max-width: 800px; margin-top: 2.5rem;">
+            <div class="telemetry-stat">
+              <span class="telemetry-value tabular" data-telemetry="messages">1,489,240</span>
+              <span class="telemetry-label">Packets Inspected</span>
+            </div>
+            <div class="telemetry-stat">
+              <span class="telemetry-value tabular text-emerald" style="color: var(--signal-emerald)" data-telemetry="threats">34,912</span>
+              <span class="telemetry-label">Threats Neutralized</span>
+            </div>
+            <div class="telemetry-stat">
+              <span class="telemetry-value tabular" data-telemetry="latency">18ms</span>
+              <span class="telemetry-label">Median Reaction</span>
+            </div>
+            <div class="telemetry-stat">
+              <span class="telemetry-value tabular" data-telemetry="integrity">99.98%</span>
+              <span class="telemetry-label">Shield Integrity</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="scroll-indicator">
+          <span>SCROLL TO TRAVERSE SHIELD</span>
+          <svg class="scroll-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M19 12l-7 7-7-7"/>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Pinned Scroll Runway Section -->
+      <section id="matrix" class="runway-section">
+        <div class="runway-sticky">
+          <div class="stage-viewport">
+            
+            <!-- Stage 01: Perimeter Ingress -->
+            <div class="stage-panel active">
+              <div class="badge-tag badge-emerald">STAGE 01 // INGRESS DEFENSE</div>
+              <h2 class="stage-title">SLIDING WINDOW RATE LIMITING</h2>
+              <p class="stage-desc">
+                Incoming message cascades are evaluated inside high-resolution sliding time windows. 
+                Spam spikes, repetitive character sequences, and high-frequency flood vectors trigger 
+                instantaneous throttling before hitting database queues.
+              </p>
+              <div class="stage-specs">
+                <div class="spec-item">
+                  <span class="spec-value tabular">3000ms</span>
+                  <span class="spec-label">Inspection Window</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-value tabular">5 MSGS</span>
+                  <span class="spec-label">Burst Threshold</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stage 02: Kinetic Moderation Core -->
+            <div class="stage-panel panel-right">
+              <div class="badge-tag badge-cyan">STAGE 02 // ENFORCEMENT ENGINE</div>
+              <h2 class="stage-title">DETERMINISTIC ACTION CASCADES</h2>
+              <p class="stage-desc">
+                Rule violations trigger predictable, non-probabilistic penalties. Warning counters 
+                escalate into automated mute sequences, kick expulsions, or permanent group bans 
+                configured down to individual chat specifications.
+              </p>
+              <div class="stage-specs">
+                <div class="spec-item">
+                  <span class="spec-value tabular">&lt; 25ms</span>
+                  <span class="spec-label">Execution Latency</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-value tabular">MUTE / BAN / KICK</span>
+                  <span class="spec-label">Configurable Cascades</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stage 03: Granular Bitmask Locks -->
+            <div class="stage-panel">
+              <div class="badge-tag badge-amber">STAGE 03 // ACCESS CONTROL</div>
+              <h2 class="stage-title">GRANULAR BITMASK PERMISSIONS</h2>
+              <p class="stage-desc">
+                Precision locks protect your community from malicious vectors. Lock voice notes, 
+                animated stickers, hyperlinks, inline bots, or media forwards with a single administrative 
+                directive. Zero unauthorized payloads enter the discussion pool.
+              </p>
+              <div class="stage-specs">
+                <div class="spec-item">
+                  <span class="spec-value tabular">16 TYPES</span>
+                  <span class="spec-label">Supported Locks</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-value tabular">SUB-SECOND</span>
+                  <span class="spec-label">Telegram API Sync</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stage 04: Immutable Audit Ledger -->
+            <div class="stage-panel panel-right">
+              <div class="badge-tag badge-crimson">STAGE 04 // PERSISTENCE</div>
+              <h2 class="stage-title">FORENSIC AUDIT TRAIL</h2>
+              <p class="stage-desc">
+                Every moderation verdict, purge operation, and permission modification is 
+                committed to ACID-compliant storage via SQLAlchemy 2.0 (SQLite or PostgreSQL). 
+                Complete audit transparency guarantees accountable, tamper-proof governance.
+              </p>
+              <div class="stage-specs">
+                <div class="spec-item">
+                  <span class="spec-value tabular">SQLAlchemy 2.0</span>
+                  <span class="spec-label">Asyncio ORM</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-value tabular">POSTGRES / SQLITE</span>
+                  <span class="spec-label">Zero Vendor Lock-in</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Tactical Interactive Shell Section -->
+      <section id="terminal" class="sandbox-section">
+        <div class="section-header">
+          <div class="badge-tag badge-cyan">SANDBOX // SIMULATION MODE</div>
+          <h2 class="section-title">TACTICAL COMMAND TESTING</h2>
+          <p class="section-subtitle">
+            Experience Aegis's deterministic command parser in real-time. Execute core administration commands 
+            below to observe how the defense lattice responds.
+          </p>
+        </div>
+
+        <div class="sandbox-layout">
+          <!-- Terminal Emulator -->
+          <div class="terminal-window">
+            <div class="terminal-header">
+              <div class="terminal-dots">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+              </div>
+              <span class="terminal-title">AEGIS // OPERATIONAL REPL</span>
+              <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--signal-emerald)">ONLINE</span>
+            </div>
+
+            <div class="terminal-body">
+              <div class="terminal-line">
+                <span class="terminal-prompt">aegis@mesh:~$</span>
+                <span class="terminal-text">/info</span>
+              </div>
+              <div class="terminal-output info">
+                <div>🛡️ Aegis Defense Core v0.1.0 initialized.</div>
+                <div>↳ Telecommunications Node: TG_CORE_PRIMARY</div>
+                <div>↳ Ready for administrative command ingestion. Type /help for syntax.</div>
+              </div>
+            </div>
+
+            <!-- Quick Command Chips -->
+            <div class="terminal-chips">
+              <span class="cmd-chip" data-cmd="/ban @spammer_node Ingress violation">/ban @spammer</span>
+              <span class="cmd-chip" data-cmd="/mute @flood_bot 45m">/mute @flood_bot</span>
+              <span class="cmd-chip" data-cmd="/setantiflood on">/setantiflood on</span>
+              <span class="cmd-chip" data-cmd="/lock stickers">/lock stickers</span>
+              <span class="cmd-chip" data-cmd="/purge">/purge</span>
+              <span class="cmd-chip" data-cmd="/rules">/rules</span>
+            </div>
+
+            <div class="terminal-input-row">
+              <span class="terminal-prompt">aegis@mesh:~$</span>
+              <input type="text" class="terminal-input" placeholder="Type a command (e.g. /ban, /mute, /lock, /help)..." autocomplete="off" spellcheck="false" />
+            </div>
+          </div>
+
+          <!-- Tactical Control Spec Card -->
+          <div class="tactical-card" style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div>
+              <div class="badge-tag badge-emerald" style="margin-bottom: 0.8rem;">ENGINE ARCHITECTURE</div>
+              <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Deterministic Rose Parity</h3>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+                Engineered from first principles to match the revered Miss Rose bot feature set, 
+                eliminating unpredictable AI hallucinations in favor of strictly deterministic rules.
+              </p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.6rem; font-family: var(--font-mono); font-size: 0.8rem;">
+                <span style="color: var(--text-muted)">PARSER PARADIGM</span>
+                <span style="color: var(--text-primary)">Strict AST / Regex Filters</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.6rem; font-family: var(--font-mono); font-size: 0.8rem;">
+                <span style="color: var(--text-muted)">ASYNC PIPELINE</span>
+                <span style="color: var(--signal-emerald)">PTB v21 + HTTP/2 Multiplexing</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.6rem; font-family: var(--font-mono); font-size: 0.8rem;">
+                <span style="color: var(--text-muted)">DATABASE BACKENDS</span>
+                <span style="color: var(--text-primary)">PostgreSQL (asyncpg) / SQLite (aiosqlite)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding-bottom: 0.2rem; font-family: var(--font-mono); font-size: 0.8rem;">
+                <span style="color: var(--text-muted)">SECURITY MODEL</span>
+                <span style="color: var(--signal-cyan)">Role-Based Access Control (RBAC)</span>
+              </div>
+            </div>
+
+            <div class="code-box">
+              <button class="copy-btn" data-target="quick-setup">COPY</button>
+              <div id="quick-setup" style="color: var(--signal-emerald)">
+# Quick Start via uv<br/>
+git clone https://github.com/mrsehajofficial/aegis.git<br/>
+cd aegis && uv run python -m app.setup
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Core Capabilities Grid -->
+      <section id="features" class="features-section">
+        <div class="section-header">
+          <div class="badge-tag badge-emerald">MODULAR DEFENSE MATRIX</div>
+          <h2 class="section-title">ENGINEERED FOR SCALE</h2>
+          <p class="section-subtitle">
+            Every subsystem is crafted for speed, zero telemetry leakage, and complete group sovereignty.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <div class="tactical-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <h3 class="feature-title">Sliding-Window Anti-Flood</h3>
+            <p class="feature-text">
+              Tracks per-user message velocity in transient memory. Rapid bursts trigger 
+              immediate temporary restriction before channel discussion can be disrupted.
+            </p>
+          </div>
+
+          <div class="tactical-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+            </svg>
+            <h3 class="feature-title">Automated Blacklist Engine</h3>
+            <p class="feature-text">
+              Maintains per-group banned word dictionaries. Messages containing forbidden tokens 
+              or malicious tracking parameters are instantly intercepted and removed.
+            </p>
+          </div>
+
+          <div class="tactical-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <h3 class="feature-title">Granular Content Locks</h3>
+            <p class="feature-text">
+              Lock down 16 distinct content classes including audio, video, documents, stickers, 
+              links, and forwarded entities without altering admin privileges.
+            </p>
+          </div>
+
+          <div class="tactical-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <h3 class="feature-title">Keyword Notes & Filters</h3>
+            <p class="feature-text">
+              Save instant Markdown-formatted notes and auto-reply filters. Group members 
+              retrieve knowledge bases via simple hashtag or command triggers.
+            </p>
+          </div>
+
+          <div class="tactical-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="8.5" cy="7" r="4"></circle>
+              <line x1="20" y1="8" x2="20" y2="14"></line>
+              <line x1="23" y1="11" x2="17" y2="11"></line>
+            </svg>
+            <h3 class="feature-title">Dynamic Welcomes & Rules</h3>
+            <p class="feature-text">
+              Personalized greetings, customizable goodbye acknowledgments, and pinned 
+              community bylaws ensure new arrivals integrate seamlessly.
+            </p>
+          </div>
+
+          <div class="tactical-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            </svg>
+            <h3 class="feature-title">Docker & Systemd Ready</h3>
+            <p class="feature-text">
+              Zero complicated runtime dependencies. Deploy on edge VPS instances with a single 
+              Docker Compose command or a resilient native systemd service unit.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Architecture & Deployment -->
+      <section id="architecture" class="architecture-section">
+        <div class="section-header">
+          <div class="badge-tag badge-cyan">SYSTEM TOPOLOGY</div>
+          <h2 class="section-title">BARE-METAL PRECISION</h2>
+          <p class="section-subtitle">
+            Engineered for high reliability, low memory footprints, and simple maintenance.
+          </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+          <div class="tactical-card">
+            <h4 style="font-family: var(--font-mono); font-size: 1rem; margin-bottom: 1rem; color: var(--signal-emerald)">
+              OPTION 01 // INTERACTIVE WIZARD
+            </h4>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.6;">
+              Run the terminal setup wizard. Securely sets your Telegram bot token, provisions the database, and creates `.env` with strict `600` permissions.
+            </p>
+            <div class="code-box">
+              <button class="copy-btn" data-target="code-wizard">COPY</button>
+              <code id="code-wizard">python -m app.setup</code>
+            </div>
+          </div>
+
+          <div class="tactical-card">
+            <h4 style="font-family: var(--font-mono); font-size: 1rem; margin-bottom: 1rem; color: var(--signal-cyan)">
+              OPTION 02 // DOCKER CONTAINER
+            </h4>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.6;">
+              Production orchestration with automated healthchecks, volume persistence for SQLite/PostgreSQL, and non-root user sandboxing.
+            </p>
+            <div class="code-box">
+              <button class="copy-btn" data-target="code-docker">COPY</button>
+              <code id="code-docker">docker compose up --build -d</code>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-section">
+      <div class="footer-content">
+        <div>
+          <span style="color: #fff; font-weight: 700;">AEGIS</span> // THE IMPENETRABLE TELEGRAM SHIELD
+          <div style="margin-top: 0.35rem; color: var(--text-muted)">MIT License &bull; Python 3.11+ &bull; Deterministic Core</div>
+        </div>
+        <div>
+          Created with precision by <a href="https://github.com/mrsehajofficial" target="_blank" rel="noopener noreferrer" style="color: var(--signal-emerald); text-decoration: none;">mrsehajofficial</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

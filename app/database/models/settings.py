@@ -30,6 +30,9 @@ class GroupSettings(Base):
     log_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0", nullable=False)
     reports_enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1", nullable=False)
     rules: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # Custom welcome/goodbye message text. NULL means "use the built-in default."
+    welcome_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    goodbye_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -4,6 +4,7 @@ from telegram.ext import ContextTypes, ChatMemberHandler
 
 from app.config.settings import settings
 from app.services.groups import register_or_update_group, sync_group_admins, log_bot_added
+from app.bot.handlers.welcome import _send_join_or_leave_message
 
 logger = logging.getLogger(__name__)
 
@@ -51,18 +52,23 @@ async def handle_my_chat_member(update: Update, context: ContextTypes.DEFAULT_TY
         except Exception as e:
             logger.warning(f"Failed to log BOT_ADDED for group {chat.id}: {e}")
 
-        # Greet the group
+        # Greet the group — use the configured welcome message when active,
+        # otherwise fall back to the classic activation greeting.
         try:
-            await context.bot.send_message(
-                chat_id=chat.id,
-                text=(
-                    f"<b>{settings.BOT_NAME} is now active in this group.</b>\n\n"
-                    "I'll handle moderation, filters and member management for you.\n"
-                    "Every action is logged and reviewable via /logs.\n\n"
-                    "Send /help to see the full command list."
-                ),
-                parse_mode="HTML",
+            sent_welcome = await _send_join_or_leave_message(
+                context.bot, chat.id, "welcome", names=[settings.BOT_NAME]
             )
+            if not sent_welcome:
+                await context.bot.send_message(
+                    chat_id=chat.id,
+                    text=(
+                        f"<b>{settings.BOT_NAME} is now active in this group.</b>\n\n"
+                        "I'll handle moderation, filters and member management for you.\n"
+                        "Every action is logged and reviewable via /logs.\n\n"
+                        "Send /help to see the full command list."
+                    ),
+                    parse_mode="HTML",
+                )
         except Exception as e:
             logger.warning(f"Could not send greeting to group {chat.id}: {e}")
 
@@ -72,6 +78,13 @@ async def handle_my_chat_member(update: Update, context: ContextTypes.DEFAULT_TY
             f"Bot removed from group {chat.title!r} (id={chat.id}) "
             f"by @{actor.username or actor.id if actor else 'unknown'}"
         )
+        # Best-effort goodbye. Telegram revokes the bot's send rights immediately
+        # on removal, so this usually fails — which _send_join_or_leave_message
+        # logs and swallows gracefully.
+        try:
+            await _send_join_or_leave_message(context.bot, chat.id, "goodbye", names=[settings.BOT_NAME])
+        except Exception as e:
+            logger.warning(f"Could not send goodbye message to group {chat.id}: {e}")
         # We intentionally keep the group data; removal is not data deletion.
 
     # Bot was promoted to admin while already a member

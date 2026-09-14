@@ -28,6 +28,7 @@ from app.bot.handlers.welcome import (
     setrules_command,
     settings_command,
     setwarnlimit_command,
+    handle_chat_member,
 )
 from app.bot.handlers.filters import (
     filter_command,
@@ -64,6 +65,7 @@ __all__ = [
     "setrules_command",
     "settings_command",
     "setwarnlimit_command",
+    "handle_chat_member",
     "filter_command",
     "filters_command",
     "stop_command",

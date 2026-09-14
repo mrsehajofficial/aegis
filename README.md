@@ -199,10 +199,10 @@ The wizard will:
 ```
 /rules                           — Display group rules
 /setrules [text]                 — Set group rules
-/welcome                         — Check welcome status
-/setwelcome on|off               — Toggle welcome messages
-/goodbye                         — Check goodbye status
-/setgoodbye on|off               — Toggle goodbye messages
+/welcome                         — Show the welcome message
+/setwelcome on|off|[text]        — Toggle or set the welcome message
+/goodbye                         — Show the goodbye message
+/setgoodbye on|off|[text]        — Toggle or set the goodbye message
 /settings                        — View all group settings
 /setwarnlimit N                  — Set warn limit (1-20)
 ```

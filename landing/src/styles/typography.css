@@ -1,0 +1,89 @@
+/* Typography & Tabular Precision */
+body {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background-color: var(--bg-obsidian);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: var(--text-primary);
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 6.5vw, 5.5rem);
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+}
+
+.stage-title {
+  font-size: clamp(2rem, 4.5vw, 3.8rem);
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  letter-spacing: -0.03em;
+}
+
+/* Tactical Eyebrows & Badges */
+.badge-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-subtle);
+}
+
+.badge-tag::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.badge-emerald {
+  color: var(--signal-emerald);
+  border-color: rgba(0, 255, 136, 0.25);
+  background: rgba(0, 255, 136, 0.05);
+}
+
+.badge-cyan {
+  color: var(--signal-cyan);
+  border-color: rgba(0, 240, 255, 0.25);
+  background: rgba(0, 240, 255, 0.05);
+}
+
+.badge-amber {
+  color: var(--signal-amber);
+  border-color: rgba(255, 170, 0, 0.25);
+  background: rgba(255, 170, 0, 0.05);
+}
+
+.badge-crimson {
+  color: var(--signal-crimson);
+  border-color: rgba(255, 56, 92, 0.25);
+  background: rgba(255, 56, 92, 0.05);
+}
