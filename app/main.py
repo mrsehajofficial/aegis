@@ -7,12 +7,16 @@ Usage:
 """
 import asyncio
 import logging
+import secrets
 import sys
 from pathlib import Path
+
 from telegram.ext import Application
 
 from app.config.settings import settings
 from app.bot.application import build_application
+from app.bot.health import HealthServer
+from app.anti_spam.flood import close_flood_store, init_flood_store
 from app.database.connection import init_db, close_db
 
 # Configure logging
@@ -26,9 +30,55 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+async def _start_delivery(app: Application) -> str:
+    """
+    Start receiving updates, preferring webhooks when a public URL is configured.
+
+    Webhooks remove the polling round-trip and let several workers share one bot,
+    which is what makes horizontal scaling possible. Returns the active mode name
+    ("webhook" or "polling") so the health endpoint can report it.
+    """
+    if not settings.WEBHOOK_URL:
+        await app.updater.start_polling()
+        logger.info("Delivery mode: long polling.")
+        return "polling"
+
+    url_path = settings.WEBHOOK_PATH or "/webhook"
+    webhook_url = f"{settings.WEBHOOK_URL.rstrip('/')}{url_path}"
+    # A secret token lets Telegram sign each request; if none is configured we
+    # generate one per boot so unauthenticated POSTs are still rejected.
+    secret = settings.WEBHOOK_SECRET or secrets.token_urlsafe(24)
+
+    try:
+        await app.updater.start_webhook(
+            listen=settings.LISTEN_HOST,
+            port=settings.WEBHOOK_PORT,
+            url_path=url_path,
+            webhook_url=webhook_url,
+            secret_token=secret,
+            drop_pending_updates=False,
+        )
+    except Exception as e:
+        # Usually the optional tornado dependency behind the "webhooks" extra.
+        logger.error(
+            f"Webhook mode failed to start ({type(e).__name__}: {e}). "
+            'Falling back to long polling — install with pip install '
+            '"python-telegram-bot[webhooks]" to enable webhooks.'
+        )
+        await app.updater.start_polling()
+        return "polling"
+
+    logger.info(
+        f"Delivery mode: webhook. Serving {url_path} on port "
+        f"{settings.WEBHOOK_PORT} as {webhook_url}"
+    )
+    return "webhook"
+
+
 async def run_bot() -> None:
     """
-    Initialize the database, build the application, and start polling.
+    Initialize shared state, build the application, and start receiving updates
+    over webhooks when configured, otherwise over long polling.
     """
     if not settings.BOT_TOKEN or settings.BOT_TOKEN in ("dummy_token", "123456:REPLACE_ME") or ":" not in settings.BOT_TOKEN:
         logger.error(
@@ -50,13 +100,33 @@ async def run_bot() -> None:
     else:
         logger.info("Using PostgreSQL — ensure Alembic migrations have been run.")
 
+    # Flood counters must be ready before the first message arrives.
+    flood_store = await init_flood_store()
+    logger.info(f"Flood store backend: {flood_store.name}")
+
     logger.info("Building application...")
     app: Application = build_application()
 
-    logger.info(f"Starting bot polling (token={'***' + settings.BOT_TOKEN[-4:]})...")
+    logger.info(f"Starting bot (token={'***' + settings.BOT_TOKEN[-4:]})...")
     await app.initialize()
     await app.start()
-    await app.updater.start_polling()
+
+    mode = await _start_delivery(app)
+
+    health: HealthServer | None = None
+    if settings.HEALTH_PORT:
+        health = HealthServer(
+            port=settings.HEALTH_PORT, host=settings.LISTEN_HOST, mode=mode
+        )
+        try:
+            await health.start()
+        except Exception as e:
+            # A busy port must not stop the bot from serving groups.
+            logger.warning(
+                f"Could not start the health endpoint on port "
+                f"{settings.HEALTH_PORT}: {e}"
+            )
+            health = None
 
     try:
         # Run until interrupted
@@ -65,9 +135,12 @@ async def run_bot() -> None:
         logger.info("Received interrupt signal. Shutting down...")
     finally:
         logger.info("Stopping bot...")
+        if health is not None:
+            await health.stop()
         await app.updater.stop()
         await app.stop()
         await app.shutdown()
+        await close_flood_store()
         await close_db()
         logger.info("Bot shutdown complete.")
 

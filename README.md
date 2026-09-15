@@ -10,7 +10,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-*Aegis — named after the divine shield of Zeus. Impenetrable protection for your Telegram groups.*
+*Aegis — the emerald guardian of your Telegram groups. Deterministic, dependable protection.*
 
 [Features](#features) •
 [Installation](#installation) •
@@ -421,7 +421,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) — Telegram Bot Framework
 - [SQLAlchemy](https://www.sqlalchemy.org/) — ORM and Database Toolkit
-- [Rose Bot](https://t.me/MissRose_bot) — Feature parity reference
 
 ---
 

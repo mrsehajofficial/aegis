@@ -1,31 +1,25 @@
 import './styles/index.css';
 import { Scroller } from './motion/scroller';
-import { WebGLScene } from './webgl/scene';
 import { initPinnedTimelines } from './motion/timeline';
 import { TacticalTerminal } from './ui/terminal';
 import { TelemetryEngine } from './ui/telemetry';
 
 class AegisLandingApp {
   private scroller: Scroller;
-  private scene: WebGLScene;
   private terminal: TacticalTerminal | null = null;
   private telemetry: TelemetryEngine;
 
   constructor() {
     this.scroller = new Scroller();
-
-    const canvas = document.querySelector<HTMLCanvasElement>('#webgl-canvas')!;
-    this.scene = new WebGLScene(canvas);
-
     this.telemetry = new TelemetryEngine();
 
-    // Initialize pinned scroll animations
-    initPinnedTimelines(this.scene);
+    // Initialize pinned scroll animations (stage runway + mirrored video)
+    initPinnedTimelines();
 
-    // Initialize tactical terminal
+    // Initialize terminal
     const termContainer = document.querySelector<HTMLElement>('.terminal-window');
     if (termContainer) {
-      this.terminal = new TacticalTerminal(termContainer, this.scene, (_cmd: string) => {
+      this.terminal = new TacticalTerminal(termContainer, (_cmd: string) => {
         this.telemetry.incrementThreat();
       });
     }
@@ -33,7 +27,6 @@ class AegisLandingApp {
     this.initNavigation();
     this.initMobileMenu();
     this.initCodeCopy();
-    this.startRenderLoop();
   }
 
   private initMobileMenu(): void {
@@ -107,14 +100,6 @@ class AegisLandingApp {
         }
       });
     });
-  }
-
-  private startRenderLoop(): void {
-    const tick = () => {
-      this.scene.render();
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
   }
 }
 

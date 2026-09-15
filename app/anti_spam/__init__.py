@@ -16,7 +16,13 @@ from telegram import Message
 from telegram.ext import ContextTypes
 
 from app.anti_spam.flood import check_flood, reset_user
-from app.anti_spam.detector import check_spam, count_urls, count_mentions
+from app.anti_spam.detector import (
+    check_edited_spam,
+    check_spam,
+    check_text_abuse,
+    count_mentions,
+    count_urls,
+)
 from app.anti_spam.actions import delete_message_safely, mute_user, ban_user
 
 logger = logging.getLogger(__name__)
@@ -45,10 +51,16 @@ class AntiSpamChecker:
         self.chat_id = chat_id
         self.settings = settings
 
-    async def check_message(self, message: Message) -> Optional[str]:
+    async def check_message(self, message: Message, is_edit: bool = False) -> Optional[str]:
         """
         Run flood and spam checks on a message.
         Returns a string describing the action taken, or None if message is clean.
+
+        Args:
+            message: The message to inspect
+            is_edit: True when this is an ``edited_message`` update. Edits use a
+                stricter rule (see :func:`check_edited_spam`) because spammers
+                routinely post clean text and edit a link in afterwards.
         """
         if not message or not message.from_user:
             return None
@@ -58,12 +70,12 @@ class AntiSpamChecker:
 
         # -- Flood check ----------------------------------------------
         if self.settings.anti_flood_enabled:
-            if check_flood(
+            if await check_flood(
                 self.chat_id, user_id,
                 self.settings.flood_msg_limit,
                 self.settings.flood_window_seconds,
             ):
-                reset_user(self.chat_id, user_id)
+                await reset_user(self.chat_id, user_id)
                 muted = await mute_user(
                     self.context, self.chat_id, user_id,
                     timedelta(minutes=self.settings.flood_mute_minutes),
@@ -80,7 +92,17 @@ class AntiSpamChecker:
             mention_count = count_mentions(text)
             has_forward = message.forward_date is not None
 
-            result = check_spam(text, has_forward, url_count, mention_count)
+            if is_edit:
+                result = check_edited_spam(text, has_forward, url_count, mention_count)
+            else:
+                result = check_spam(text, has_forward, url_count, mention_count)
+
+            # Structural abuse (zalgo, character floods, symbol walls) is
+            # independent of keywords and links, so it layers on top of whichever
+            # rule set ran above.
+            for reason in check_text_abuse(text).reasons:
+                result.add(reason)
+
             if result.is_spam:
                 action_taken = await self._handle_spam(message, result.reasons)
                 return action_taken

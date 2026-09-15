@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Aegis: Production-grade, deterministic Telegram group management and defense shield. Impenetrable moderation, anti-flood rate-limiting, and immutable audit logs." />
-  <title>AEGIS // Deterministic Telegram Group Defense</title>
+  <meta name="description" content="Aegis: The emerald guardian of Telegram. Production-grade, deterministic group management with anti-flood rate-limiting, granular locks, and immutable audit logs." />
+  <title>AEGIS // The Emerald Guardian of Telegram</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -19,12 +19,6 @@
     <rect width="100%" height="100%" filter="url(#fractal-noise)" />
   </svg>
 
-  <!-- Technical Background Grid -->
-  <div class="bg-grid" aria-hidden="true"></div>
-
-  <!-- Persistent 3D WebGL Shield Canvas -->
-  <canvas id="webgl-canvas"></canvas>
-
   <div class="page-wrapper">
     <!-- Top Navigation -->
     <header class="nav-header">
@@ -37,10 +31,10 @@
       </a>
 
       <nav class="nav-links">
-        <a href="#matrix" class="nav-link">DEFENSE MATRIX</a>
-        <a href="#terminal" class="nav-link">TACTICAL SHELL</a>
+        <a href="#matrix" class="nav-link">THE CORE</a>
+        <a href="#terminal" class="nav-link">CONSOLE</a>
         <a href="#features" class="nav-link">CAPABILITIES</a>
-        <a href="#architecture" class="nav-link">ARCHITECTURE</a>
+        <a href="#architecture" class="nav-link">DEPLOY</a>
         <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">
           <span>GITHUB</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -50,7 +44,7 @@
       </nav>
 
       <div class="nav-mobile-cta">
-        <a href="#terminal" class="btn btn-primary btn-sm"><span>SHELL</span></a>
+        <a href="#terminal" class="btn btn-primary btn-sm"><span>CONSOLE</span></a>
         <button class="mobile-toggle-btn" aria-label="Toggle Navigation Menu">
           <span class="hamburger-line"></span>
           <span class="hamburger-line"></span>
@@ -66,10 +60,10 @@
         <button class="mobile-close-btn" aria-label="Close menu">&times;</button>
       </div>
       <div class="mobile-drawer-links">
-        <a href="#matrix" class="mobile-drawer-link">01 // DEFENSE MATRIX</a>
-        <a href="#terminal" class="mobile-drawer-link">02 // TACTICAL SHELL</a>
+        <a href="#matrix" class="mobile-drawer-link">01 // THE CORE</a>
+        <a href="#terminal" class="mobile-drawer-link">02 // CONSOLE</a>
         <a href="#features" class="mobile-drawer-link">03 // CAPABILITIES</a>
-        <a href="#architecture" class="mobile-drawer-link">04 // ARCHITECTURE</a>
+        <a href="#architecture" class="mobile-drawer-link">04 // DEPLOY</a>
       </div>
       <div class="mobile-drawer-footer">
         <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="width: 100%; justify-content: center;">
@@ -84,60 +78,88 @@
     <main>
       <!-- Hero Section -->
       <section class="hero-section">
-        <div class="hero-content">
-          <div class="badge-tag badge-emerald">
-            <span>PERIMETER SYSTEM READY // PTB V21+</span>
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <div class="badge-tag badge-emerald">
+              <span>✦ GUARDIAN PROTOCOL ONLINE // CORE READY</span>
+            </div>
+
+            <h1 class="hero-title">
+              THE EMERALD<br />GUARDIAN.
+            </h1>
+
+            <p class="hero-description">
+              Aegis stands watch over your Telegram group — production-grade, deterministic
+              moderation built on Python 3.11, SQLAlchemy 2.0 and sliding-window rate limiting.
+              Fast, fair and always green-lit.
+            </p>
+
+            <div class="hero-actions">
+              <a href="#terminal" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="4 17 10 11 4 5"></polyline>
+                  <line x1="12" y1="19" x2="20" y2="19"></line>
+                </svg>
+                <span>LAUNCH THE CONSOLE</span>
+              </a>
+              <a href="#matrix" class="btn btn-secondary">
+                <span>EXPLORE THE CORE</span>
+              </a>
+            </div>
+
+            <!-- Live Telemetry HUD Bar -->
+            <div class="telemetry-grid">
+              <div class="telemetry-stat">
+                <span class="telemetry-value tabular" data-telemetry="messages">1,489,240</span>
+                <span class="telemetry-label">Messages Screened</span>
+              </div>
+              <div class="telemetry-stat">
+                <span class="telemetry-value tabular" style="color: var(--signal-emerald)" data-telemetry="threats">34,912</span>
+                <span class="telemetry-label">Threats Neutralized</span>
+              </div>
+              <div class="telemetry-stat">
+                <span class="telemetry-value tabular" data-telemetry="latency">18ms</span>
+                <span class="telemetry-label">Median Reaction</span>
+              </div>
+              <div class="telemetry-stat">
+                <span class="telemetry-value tabular" data-telemetry="integrity">99.98%</span>
+                <span class="telemetry-label">Guard Uptime</span>
+              </div>
+            </div>
           </div>
 
-          <h1 class="hero-title">
-            THE DIVINE SHIELD<br />OF ZEUS.
-          </h1>
-
-          <p class="hero-description">
-            Production-grade, deterministic Telegram group management. Engineered with 
-            Python 3.11, SQLAlchemy 2.0, and sliding-window rate limiting for impenetrable, 
-            low-latency group protection.
-          </p>
-
-          <div class="hero-actions">
-            <a href="#terminal" class="btn btn-primary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="4 17 10 11 4 5"></polyline>
-                <line x1="12" y1="19" x2="20" y2="19"></line>
-              </svg>
-              <span>LAUNCH TACTICAL CONSOLE</span>
-            </a>
-            <a href="#matrix" class="btn btn-secondary">
-              <span>EXPLORE ARCHITECTURE</span>
-            </a>
-          </div>
-
-          <!-- Live Telemetry HUD Bar -->
-          <div class="telemetry-grid" style="width: 100%; max-width: 800px; margin-top: 2.5rem;">
-            <div class="telemetry-stat">
-              <span class="telemetry-value tabular" data-telemetry="messages">1,489,240</span>
-              <span class="telemetry-label">Packets Inspected</span>
-            </div>
-            <div class="telemetry-stat">
-              <span class="telemetry-value tabular text-emerald" style="color: var(--signal-emerald)" data-telemetry="threats">34,912</span>
-              <span class="telemetry-label">Threats Neutralized</span>
-            </div>
-            <div class="telemetry-stat">
-              <span class="telemetry-value tabular" data-telemetry="latency">18ms</span>
-              <span class="telemetry-label">Median Reaction</span>
-            </div>
-            <div class="telemetry-stat">
-              <span class="telemetry-value tabular" data-telemetry="integrity">99.98%</span>
-              <span class="telemetry-label">Shield Integrity</span>
-            </div>
+          <!-- Character Portal -->
+          <div class="character-portal">
+            <div class="character-ring"></div>
+            <div class="character-ring ring-2"></div>
+            <div class="character-ring ring-3"></div>
+            <img src="/character.png" alt="Aegis guardian character" />
+            <span class="portal-chip chip-1">✦ Group Moderator</span>
+            <span class="portal-chip chip-2">● 99.98% Uptime</span>
+            <span class="portal-chip chip-3">⚡ Sub-25ms Response</span>
           </div>
         </div>
 
         <div class="scroll-indicator">
-          <span>SCROLL TO TRAVERSE SHIELD</span>
+          <span>SCROLL TO MEET THE GUARDIAN</span>
           <svg class="scroll-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 5v14M19 12l-7 7-7-7"/>
           </svg>
+        </div>
+      </section>
+
+      <!-- Character Showcase -->
+      <section class="character-section">
+        <div class="character-showcase">
+          <img src="/character.png" alt="Aegis guardian character showcase" />
+        </div>
+        <div class="character-caption">
+          <div class="badge-tag badge-mint">THE GUARDIAN SPIRIT</div>
+          <h2 class="character-name">EVERY GROUP NEEDS A GUARDIAN</h2>
+          <p class="character-tagline">
+            No random bots, no guesswork — just one dependable protector that keeps your
+            community clean, calm and growing. Meet Aegis: your group's emerald guardian.
+          </p>
         </div>
       </section>
 
@@ -147,7 +169,7 @@
           <div class="stage-viewport">
             
             <!-- Stage 01: Perimeter Ingress -->
-            <div class="stage-panel active">
+            <div class="stage-panel panel-center active">
               <div class="badge-tag badge-emerald">STAGE 01 // INGRESS DEFENSE</div>
               <h2 class="stage-title">SLIDING WINDOW RATE LIMITING</h2>
               <p class="stage-desc">
@@ -169,7 +191,7 @@
 
             <!-- Stage 02: Kinetic Moderation Core -->
             <div class="stage-panel panel-right">
-              <div class="badge-tag badge-cyan">STAGE 02 // ENFORCEMENT ENGINE</div>
+              <div class="badge-tag badge-mint">STAGE 02 // ENFORCEMENT ENGINE</div>
               <h2 class="stage-title">DETERMINISTIC ACTION CASCADES</h2>
               <p class="stage-desc">
                 Rule violations trigger predictable, non-probabilistic penalties. Warning counters 
@@ -189,8 +211,8 @@
             </div>
 
             <!-- Stage 03: Granular Bitmask Locks -->
-            <div class="stage-panel">
-              <div class="badge-tag badge-amber">STAGE 03 // ACCESS CONTROL</div>
+            <div class="stage-panel panel-left">
+              <div class="badge-tag badge-green">STAGE 03 // ACCESS CONTROL</div>
               <h2 class="stage-title">GRANULAR BITMASK PERMISSIONS</h2>
               <p class="stage-desc">
                 Precision locks protect your community from malicious vectors. Lock voice notes, 
@@ -210,8 +232,8 @@
             </div>
 
             <!-- Stage 04: Immutable Audit Ledger -->
-            <div class="stage-panel panel-right">
-              <div class="badge-tag badge-crimson">STAGE 04 // PERSISTENCE</div>
+            <div class="stage-panel panel-center">
+              <div class="badge-tag badge-danger">STAGE 04 // PERSISTENCE</div>
               <h2 class="stage-title">FORENSIC AUDIT TRAIL</h2>
               <p class="stage-desc">
                 Every moderation verdict, purge operation, and permission modification is 
@@ -230,6 +252,10 @@
               </div>
             </div>
 
+            <!-- Scroll-Mirror Video -->
+            <div class="stage-video" data-pos="video-center">
+              <video src="/pika.mp4" muted playsinline preload="auto" disablepictureinpicture></video>
+            </div>
           </div>
         </div>
       </section>
@@ -237,11 +263,11 @@
       <!-- Tactical Interactive Shell Section -->
       <section id="terminal" class="sandbox-section">
         <div class="section-header">
-          <div class="badge-tag badge-cyan">SANDBOX // SIMULATION MODE</div>
-          <h2 class="section-title">TACTICAL COMMAND TESTING</h2>
+          <div class="badge-tag badge-mint">SANDBOX // SIMULATION MODE</div>
+          <h2 class="section-title">THE GUARDIAN CONSOLE</h2>
           <p class="section-subtitle">
             Experience Aegis's deterministic command parser in real-time. Execute core administration commands 
-            below to observe how the defense lattice responds.
+            below to observe how the guardian responds.
           </p>
         </div>
 
@@ -254,7 +280,7 @@
                 <span class="terminal-dot dot-yellow"></span>
                 <span class="terminal-dot dot-green"></span>
               </div>
-              <span class="terminal-title">AEGIS // OPERATIONAL REPL</span>
+              <span class="terminal-title">AEGIS // GUARDIAN CONSOLE</span>
               <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--signal-emerald)">ONLINE</span>
             </div>
 
@@ -290,10 +316,10 @@
           <div class="tactical-card" style="display: flex; flex-direction: column; gap: 1.5rem;">
             <div>
               <div class="badge-tag badge-emerald" style="margin-bottom: 0.8rem;">ENGINE ARCHITECTURE</div>
-              <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Deterministic Rose Parity</h3>
+              <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Deterministic Moderation Engine</h3>
               <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
-                Engineered from first principles to match the revered Miss Rose bot feature set, 
-                eliminating unpredictable AI hallucinations in favor of strictly deterministic rules.
+                Engineered from first principles with strictly deterministic rules — no AI
+                hallucinations, no partial parses. Every command resolves predictably, every time.
               </p>
             </div>
 
@@ -312,7 +338,7 @@
               </div>
               <div style="display: flex; justify-content: space-between; padding-bottom: 0.2rem; font-family: var(--font-mono); font-size: 0.8rem;">
                 <span style="color: var(--text-muted)">SECURITY MODEL</span>
-                <span style="color: var(--signal-cyan)">Role-Based Access Control (RBAC)</span>
+                <span style="color: var(--signal-mint)">Role-Based Access Control (RBAC)</span>
               </div>
             </div>
 
@@ -419,7 +445,7 @@ cd aegis && uv run python -m app.setup
       <!-- Architecture & Deployment -->
       <section id="architecture" class="architecture-section">
         <div class="section-header">
-          <div class="badge-tag badge-cyan">SYSTEM TOPOLOGY</div>
+          <div class="badge-tag badge-mint">SYSTEM TOPOLOGY</div>
           <h2 class="section-title">BARE-METAL PRECISION</h2>
           <p class="section-subtitle">
             Engineered for high reliability, low memory footprints, and simple maintenance.
@@ -441,7 +467,7 @@ cd aegis && uv run python -m app.setup
           </div>
 
           <div class="tactical-card">
-            <h4 style="font-family: var(--font-mono); font-size: 1rem; margin-bottom: 1rem; color: var(--signal-cyan)">
+            <h4 style="font-family: var(--font-mono); font-size: 1rem; margin-bottom: 1rem; color: var(--signal-mint)">
               OPTION 02 // DOCKER CONTAINER
             </h4>
             <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.6;">
@@ -460,7 +486,7 @@ cd aegis && uv run python -m app.setup
     <footer class="footer-section">
       <div class="footer-content">
         <div>
-          <span style="color: #fff; font-weight: 700;">AEGIS</span> // THE IMPENETRABLE TELEGRAM SHIELD
+          <span style="color: var(--signal-emerald); font-weight: 700;">AEGIS</span> // THE EMERALD GUARDIAN OF TELEGRAM
           <div style="margin-top: 0.35rem; color: var(--text-muted)">MIT License &bull; Python 3.11+ &bull; Deterministic Core</div>
         </div>
         <div>

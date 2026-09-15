@@ -44,6 +44,17 @@ class WarningRepository(BaseRepository[Warning]):
         result = await self.session.execute(query)
         return result.scalar() or 0
 
+    async def count_for_group(self, group_id: int) -> tuple[int, int]:
+        """(total warnings, unique warned users) for a group."""
+        from sqlalchemy import func
+        query = select(
+            func.count(),
+            func.count(func.distinct(Warning.user_id)),
+        ).select_from(Warning).where(Warning.group_id == group_id)
+        result = await self.session.execute(query)
+        row = result.one()
+        return (row[0] or 0, row[1] or 0)
+
     async def add_warning(
         self,
         group_id: int,

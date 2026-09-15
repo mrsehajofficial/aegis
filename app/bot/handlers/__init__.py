@@ -4,6 +4,7 @@ from app.bot.handlers.commands import (
     id_command,
     info_command,
     admins_command,
+    ping_command,
 )
 from app.bot.handlers.moderation import (
     ban_command,
@@ -26,10 +27,11 @@ from app.bot.handlers.welcome import (
     setgoodbye_command,
     rules_command,
     setrules_command,
-    settings_command,
     setwarnlimit_command,
     handle_chat_member,
 )
+from app.bot.handlers.start import start_command, menu_callback
+from app.bot.handlers.settings_ui import settings_command, settings_callback
 from app.bot.handlers.filters import (
     filter_command,
     filters_command,
@@ -45,6 +47,9 @@ __all__ = [
     "id_command",
     "info_command",
     "admins_command",
+    "ping_command",
+    "start_command",
+    "menu_callback",
     "ban_command",
     "unban_command",
     "kick_command",
@@ -64,6 +69,7 @@ __all__ = [
     "rules_command",
     "setrules_command",
     "settings_command",
+    "settings_callback",
     "setwarnlimit_command",
     "handle_chat_member",
     "filter_command",

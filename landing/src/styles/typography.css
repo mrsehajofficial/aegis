@@ -25,9 +25,13 @@ h1, h2, h3, h4 {
 }
 
 .hero-title {
-  font-size: clamp(2.5rem, 6.5vw, 5.5rem);
+  font-size: clamp(2.5rem, 6vw, 5rem);
   letter-spacing: -0.05em;
   text-transform: uppercase;
+  background: linear-gradient(180deg, #eafff4 0%, #7dffc4 55%, #2ef59d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .stage-title {
@@ -41,7 +45,7 @@ h1, h2, h3, h4 {
   letter-spacing: -0.03em;
 }
 
-/* Tactical Eyebrows & Badges */
+/* Eyebrows & Badges */
 .badge-tag {
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -66,24 +70,30 @@ h1, h2, h3, h4 {
 
 .badge-emerald {
   color: var(--signal-emerald);
-  border-color: rgba(0, 255, 136, 0.25);
-  background: rgba(0, 255, 136, 0.05);
+  border-color: rgba(46, 245, 157, 0.28);
+  background: rgba(46, 245, 157, 0.07);
 }
 
-.badge-cyan {
-  color: var(--signal-cyan);
-  border-color: rgba(0, 240, 255, 0.25);
-  background: rgba(0, 240, 255, 0.05);
+.badge-mint {
+  color: var(--signal-mint);
+  border-color: rgba(125, 255, 196, 0.25);
+  background: rgba(125, 255, 196, 0.05);
 }
 
-.badge-amber {
-  color: var(--signal-amber);
-  border-color: rgba(255, 170, 0, 0.25);
-  background: rgba(255, 170, 0, 0.05);
+.badge-green {
+  color: var(--signal-green);
+  border-color: rgba(52, 211, 153, 0.25);
+  background: rgba(52, 211, 153, 0.06);
 }
 
-.badge-crimson {
-  color: var(--signal-crimson);
-  border-color: rgba(255, 56, 92, 0.25);
-  background: rgba(255, 56, 92, 0.05);
+.badge-deep {
+  color: var(--signal-deep);
+  border-color: rgba(15, 122, 77, 0.35);
+  background: rgba(15, 122, 77, 0.08);
+}
+
+.badge-danger {
+  color: var(--signal-danger);
+  border-color: rgba(255, 107, 125, 0.28);
+  background: rgba(255, 107, 125, 0.06);
 }

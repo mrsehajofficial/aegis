@@ -13,6 +13,7 @@ from app.database.repositories.settings import SettingsRepository
 from app.database.repositories.protection import BlacklistRepository
 from app.bot.helpers.ensure_group import guard
 from app.bot.middleware.auth import is_admin_or_above
+from app.anti_spam.normalize import normalize
 
 logger = logging.getLogger(__name__)
 
@@ -254,11 +255,16 @@ async def check_protection(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             if member and member.role in ("admin", "owner"):
                 return
             settings = await SettingsRepository(session).get_by_group_id(g.id)
-            text = (message.text or message.caption or "").lower()
-            if text:
+            # Match against the *normalised* form so invisible characters,
+            # homoglyphs and leetspeak cannot smuggle a banned word through:
+            # "bаdword" (Cyrillic а) is not the string "badword".
+            raw_text = message.text or message.caption or ""
+            if raw_text:
+                normalised = normalize(raw_text)
                 bl_words = await BlacklistRepository(session).get_by_group(g.id)
                 for bl_word in bl_words:
-                    if bl_word.word.lower() in text:
+                    needle = normalize(bl_word.word)
+                    if needle and needle in normalised:
                         await _handle_blacklist_word(message, context, bl_word.word, bl_word.action)
                         return
             if settings and (settings.anti_flood_enabled or settings.anti_spam_enabled):
@@ -270,7 +276,9 @@ async def check_protection(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                     flood_window_seconds=getattr(settings, "flood_window_seconds", 3.0) or 3.0,
                 )
                 checker = AntiSpamChecker(context, chat.id, gp)
-                await checker.check_message(message)
+                # PTB routes edited messages here too (filters match on
+                # Update.effective_message), so flag them for the stricter rule.
+                await checker.check_message(message, is_edit=update.edited_message is not None)
     except Exception as e:
         logger.debug(f"Protection check error for chat {chat.id}: {e}")
 

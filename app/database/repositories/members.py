@@ -11,6 +11,26 @@ class MemberRepository(BaseRepository[Member]):
     def __init__(self, session: AsyncSession):
         super().__init__(Member, session)
 
+    async def count_members(self, group_id: int) -> int:
+        """Number of members tracked for a group (the username cache)."""
+        query = (
+            select(func.count())
+            .select_from(Member)
+            .where(Member.group_id == group_id)
+        )
+        result = await self.session.execute(query)
+        return result.scalar() or 0
+
+    async def count_role(self, group_id: int, role: str) -> int:
+        """Number of members holding a given role in a group."""
+        query = (
+            select(func.count())
+            .select_from(Member)
+            .where(Member.group_id == group_id, Member.role == role)
+        )
+        result = await self.session.execute(query)
+        return result.scalar() or 0
+
     async def get_member(self, group_id: int, telegram_id: int) -> Optional[Member]:
         query = select(Member).where(
             Member.group_id == group_id,
@@ -71,10 +91,8 @@ class MemberRepository(BaseRepository[Member]):
             Member.role.in_(["owner", "admin", "creator", "administrator"])
         )
         result = await self.session.execute(query)
-        result = await self.session.execute(query)
         return result.scalars().all()
 
     async def get_admins(self, group_id: int) -> Sequence[Member]:
         """Alias for list_admins."""
         return await self.list_admins(group_id)
-        return result.scalars().all()

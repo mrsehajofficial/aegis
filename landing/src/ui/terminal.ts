@@ -1,5 +1,3 @@
-import { WebGLScene } from '../webgl/scene';
-
 interface CommandResponse {
   type: 'success' | 'warning' | 'danger' | 'info';
   lines: string[];
@@ -9,12 +7,10 @@ export class TacticalTerminal {
   private container: HTMLElement;
   private input: HTMLInputElement;
   private outputContainer: HTMLElement;
-  private scene: WebGLScene;
   private onCommandExecuted?: (cmd: string) => void;
 
-  constructor(container: HTMLElement, scene: WebGLScene, onCommandExecuted?: (cmd: string) => void) {
+  constructor(container: HTMLElement, onCommandExecuted?: (cmd: string) => void) {
     this.container = container;
-    this.scene = scene;
     this.onCommandExecuted = onCommandExecuted;
 
     this.outputContainer = container.querySelector<HTMLElement>('.terminal-body')!;
@@ -48,7 +44,6 @@ export class TacticalTerminal {
 
   public execute(rawCommand: string): void {
     this.appendPromptLine(rawCommand);
-    this.scene.shield.triggerDeflection();
 
     const parts = rawCommand.split(' ');
     const cmd = parts[0].toLowerCase();
@@ -182,7 +177,7 @@ export class TacticalTerminal {
             `↳ Version: 0.1.0-deterministic`,
             `↳ Engine: Python 3.11+ / PTB v21+ / SQLAlchemy Asyncio`,
             `↳ Active Session: SQLite + asyncpg verified`,
-            `↳ Divine Shield of Zeus: FULLY ARMED`
+            `↳ Emerald Guardian: FULLY ARMED`
           ],
         };
 

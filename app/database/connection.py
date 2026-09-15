@@ -77,18 +77,40 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
             raise
 
 
+# Columns added to group_settings after the initial schema (migration 001).
+# create_all() never alters existing tables, so pre-existing SQLite databases
+# need these backfilled one by one at startup. Every entry carries a NOT NULL-
+# safe server default because SQLite's ALTER TABLE ADD COLUMN requires one for
+# non-nullable columns. PostgreSQL deployments use the Alembic revisions.
+_GROUP_SETTINGS_BACKFILL = {
+    "flood_msg_limit": "INTEGER NOT NULL DEFAULT 5",
+    "flood_window_seconds": "FLOAT NOT NULL DEFAULT 3.0",
+    "flood_mute_minutes": "INTEGER NOT NULL DEFAULT 5",
+    "spam_action": "VARCHAR(32) NOT NULL DEFAULT 'delete'",
+    "reports_enabled": "BOOLEAN NOT NULL DEFAULT 1",
+    "welcome_message": "TEXT",
+    "goodbye_message": "TEXT",
+    "captcha_enabled": "BOOLEAN NOT NULL DEFAULT 0",
+    "captcha_timeout_seconds": "INTEGER NOT NULL DEFAULT 120",
+    "captcha_action": "VARCHAR(16) NOT NULL DEFAULT 'kick'",
+}
+
+
 async def _ensure_settings_columns(conn) -> None:
     """SQLite-safe backfill: create_all() does not add columns to existing tables.
 
     Mirrors the pattern used by app/migrations/v1_0_upgrade.py so pre-existing
-    SQLite databases gain the welcome/goodbye message columns without a full
-    migration run. PostgreSQL deployments use the Alembic revision instead.
+    SQLite databases gain every column added since the initial schema without a
+    full migration run. PostgreSQL deployments use the Alembic revisions instead.
+    Idempotent: only columns missing from the live table are added.
     """
     result = await conn.execute(text("PRAGMA table_info(group_settings)"))
     existing = {row[1] for row in result.fetchall()}
-    for col in ("welcome_message", "goodbye_message"):
+    if not existing:
+        return  # table does not exist yet — create_all() builds it complete
+    for col, ddl in _GROUP_SETTINGS_BACKFILL.items():
         if col not in existing:
-            await conn.execute(text(f"ALTER TABLE group_settings ADD COLUMN {col} TEXT"))
+            await conn.execute(text(f"ALTER TABLE group_settings ADD COLUMN {col} {ddl}"))
             logger.info(f"Added missing column group_settings.{col}")
 
 

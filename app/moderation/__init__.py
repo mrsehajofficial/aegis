@@ -1,4 +1,4 @@
-"""Moderation domain — implemented in V0.2."""
+"""Moderation domain — warning tracking and moderation services."""
 from app.moderation.warning_service import (
     issue_warning,
     get_user_warnings,

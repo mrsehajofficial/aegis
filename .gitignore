@@ -23,5 +23,3 @@ landing/dist/
 landing/node_modules/
 .vite/
 *.tsbuildinfo
-
-tests/*.py

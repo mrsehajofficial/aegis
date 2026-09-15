@@ -23,18 +23,18 @@
   background: var(--signal-emerald);
   color: var(--text-inverse);
   border: 1px solid var(--signal-emerald);
-  box-shadow: 0 0 20px rgba(0, 255, 136, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(46, 245, 157, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .btn-primary:hover {
-  background: #1aff96;
-  box-shadow: 0 0 30px rgba(0, 255, 136, 0.45);
+  background: #5cffb6;
+  box-shadow: 0 0 34px rgba(46, 245, 157, 0.55);
   transform: translateY(-1px);
 }
 
 .btn-primary:active {
   transform: translateY(1px);
-  box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+  box-shadow: 0 0 10px rgba(46, 245, 157, 0.25);
 }
 
 .btn-secondary {
@@ -59,7 +59,7 @@
 
 /* Glassmorphic Tactical Panels */
 .tactical-card {
-  background: rgba(14, 15, 20, 0.85);
+  background: rgba(8, 20, 15, 0.8);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 1.75rem;
@@ -76,7 +76,7 @@
   left: 0;
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  background: linear-gradient(90deg, transparent, rgba(125, 255, 196, 0.22), transparent);
 }
 
 .tactical-card:hover {
@@ -85,17 +85,17 @@
 
 /* Interactive Aegis Terminal */
 .terminal-window {
-  background: #0b0c10;
+  background: #07120d;
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(125, 255, 196, 0.05);
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
 .terminal-header {
-  background: #121318;
+  background: #0a1812;
   border-bottom: 1px solid var(--border-subtle);
   padding: 0.6rem 1rem;
   display: flex;
@@ -168,11 +168,11 @@
 }
 
 .terminal-output.warning {
-  color: var(--signal-amber);
+  color: var(--signal-green);
 }
 
 .terminal-output.danger {
-  color: var(--signal-crimson);
+  color: var(--signal-danger);
 }
 
 .terminal-input-row {
@@ -180,7 +180,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  background: rgba(18, 19, 24, 0.7);
+  background: rgba(7, 18, 13, 0.72);
   border-top: 1px solid var(--border-subtle);
 }
 
@@ -208,7 +208,7 @@
   overflow-x: auto;
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
-  background: rgba(14, 15, 20, 0.95);
+  background: rgba(7, 18, 13, 0.95);
   border-top: 1px solid var(--border-subtle);
   scrollbar-width: none;
 }
@@ -231,9 +231,9 @@
 }
 
 .cmd-chip:hover {
-  border-color: var(--signal-cyan);
-  color: var(--signal-cyan);
-  background: rgba(0, 240, 255, 0.08);
+  border-color: var(--signal-emerald);
+  color: var(--signal-emerald);
+  background: rgba(46, 245, 157, 0.08);
 }
 
 /* Telemetry HUD Cards */
@@ -334,5 +334,180 @@
   .tactical-card {
     padding: 1.25rem;
     box-sizing: border-box;
+  }
+}
+
+/* ===== Two-Column Hero ===== */
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 3rem;
+  align-items: center;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  text-align: left;
+}
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.4rem;
+  z-index: 2;
+}
+.hero-copy .hero-title {
+  margin: 0;
+}
+.hero-copy .hero-description {
+  text-align: left;
+  max-width: 560px;
+}
+.hero-actions {
+  justify-content: flex-start;
+}
+.hero-copy .telemetry-grid {
+  max-width: 620px;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+/* ===== Character Portal ===== */
+.character-portal {
+  position: relative;
+  width: min(420px, 82vw);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+}
+.character-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(125, 255, 196, 0.2);
+  animation: ring-spin 26s linear infinite;
+}
+.character-ring.ring-2 {
+  inset: 8%;
+  border-style: dashed;
+  animation-duration: 34s;
+  animation-direction: reverse;
+  opacity: 0.7;
+}
+.character-ring.ring-3 {
+  inset: 16%;
+  border-color: rgba(46, 245, 157, 0.4);
+  animation-duration: 18s;
+  animation-direction: reverse;
+}
+@keyframes ring-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.character-portal img {
+  position: relative;
+  z-index: 2;
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+  border-radius: 50%;
+  animation: character-float 7s ease-in-out infinite;
+}
+@keyframes character-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+.portal-chip {
+  position: absolute;
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--signal-emerald);
+  background: rgba(8, 20, 15, 0.85);
+  border: 1px solid rgba(46, 245, 157, 0.35);
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  animation: character-float 6s ease-in-out infinite;
+}
+.portal-chip.chip-1 { top: 8%; left: -4%; animation-delay: 0.6s; }
+.portal-chip.chip-2 { bottom: 14%; right: -6%; animation-delay: 1.4s; }
+.portal-chip.chip-3 { bottom: -4%; left: 14%; animation-delay: 2.1s; }
+
+/* ===== Character Showcase Strip ===== */
+.character-section {
+  position: relative;
+  z-index: 10;
+  padding: 5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+.character-showcase {
+  position: relative;
+  width: min(360px, 74vw);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+.character-showcase img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+}
+.character-caption {
+  max-width: 640px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+.character-name {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(180deg, #eafff4, #2ef59d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.character-tagline {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+/* ===== Responsive hero ===== */
+@media (max-width: 900px) {
+  .hero-inner {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    text-align: center;
+  }
+  .hero-copy {
+    align-items: center;
+  }
+  .hero-copy .hero-description {
+    text-align: center;
+  }
+  .hero-actions {
+    justify-content: center;
+  }
+  .character-portal {
+    order: -1;
+    width: min(300px, 78vw);
+  }
+  .character-section {
+    padding: 3.5rem 1rem;
   }
 }

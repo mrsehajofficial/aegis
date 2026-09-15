@@ -30,6 +30,11 @@ class GroupSettings(Base):
     log_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0", nullable=False)
     reports_enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1", nullable=False)
     rules: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # Join captcha: new members must tap "I'm not a bot" within the timeout or
+    # they are kicked (or banned). Disabled by default.
+    captcha_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0", nullable=False)
+    captcha_timeout_seconds: Mapped[int] = mapped_column(Integer, default=120, server_default="120", nullable=False)
+    captcha_action: Mapped[str] = mapped_column(String(16), default="kick", server_default="kick", nullable=False)
     # Custom welcome/goodbye message text. NULL means "use the built-in default."
     welcome_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     goodbye_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

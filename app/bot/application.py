@@ -1,7 +1,10 @@
 import logging
+
+from telegram import BotCommand, BotCommandScopeAllGroupChats
 from telegram.ext import (
     Application,
     ApplicationBuilder,
+    CallbackQueryHandler,
     CommandHandler,
     ChatMemberHandler,
     MessageHandler,
@@ -11,10 +14,12 @@ from telegram.ext import (
 from app.config.settings import settings
 from app.bot.handlers.commands import (
     help_command,
+    ping_command,
     id_command,
     info_command,
     admins_command,
 )
+from app.bot.handlers.start import start_command, menu_callback
 from app.bot.handlers.moderation import (
     ban_command,
     unban_command,
@@ -37,10 +42,10 @@ from app.bot.handlers.welcome import (
     setgoodbye_command,
     rules_command,
     setrules_command,
-    settings_command,
     setwarnlimit_command,
     handle_chat_member,
 )
+from app.bot.handlers.settings_ui import settings_command, settings_callback
 from app.bot.handlers.lifecycle import handle_my_chat_member
 from app.bot.handlers.errors import error_handler
 from app.bot.handlers.group_protection import (
@@ -56,6 +61,12 @@ from app.bot.handlers.group_protection import (
 )
 from app.bot.handlers.tracking import track_members
 from app.bot.handlers.reports import report_command, setreports_command
+from app.bot.handlers.stats import stats_command, mark_started
+from app.bot.handlers.captcha import (
+    handle_captcha_join,
+    verify_callback,
+    setcaptcha_command,
+)
 from app.bot.handlers.notes import (
     save_note_command,
     get_note_command,
@@ -66,20 +77,103 @@ from app.bot.handlers.notes import (
 
 logger = logging.getLogger(__name__)
 
+# Command menu published to Telegram on startup (the client's command list).
+# Declared once and rendered for both private chats and groups — minus /start,
+# which is noise inside a group.
+_COMMANDS = [
+    BotCommand("start", "Show the menu and get started"),
+    BotCommand("help", "Full command reference"),
+    BotCommand("ping", "Bot latency, database and uptime"),
+    BotCommand("id", "Show chat, user and message IDs"),
+    BotCommand("info", "Profile and role of a user"),
+    BotCommand("admins", "List group administrators"),
+    BotCommand("rules", "Show the group rules"),
+    BotCommand("setrules", "Set the group rules"),
+    BotCommand("settings", "Group settings control panel"),
+    BotCommand("stats", "Group health: members, warnings, actions"),
+    BotCommand("welcome", "Show the welcome message"),
+    BotCommand("setwelcome", "Turn welcome on/off or set its text"),
+    BotCommand("goodbye", "Show the goodbye message"),
+    BotCommand("setgoodbye", "Turn goodbye on/off or set its text"),
+    BotCommand("setwarnlimit", "Warnings before action (1-20)"),
+    BotCommand("ban", "Ban a member"),
+    BotCommand("unban", "Remove a ban"),
+    BotCommand("kick", "Remove without banning"),
+    BotCommand("mute", "Mute a member"),
+    BotCommand("unmute", "Remove a mute"),
+    BotCommand("warn", "Issue a warning"),
+    BotCommand("warnings", "View a user's warnings"),
+    BotCommand("resetwarns", "Clear a user's warnings"),
+    BotCommand("purge", "Delete from the replied message onward"),
+    BotCommand("pin", "Pin the replied message"),
+    BotCommand("unpin", "Unpin the pinned message"),
+    BotCommand("logs", "Recent moderation log"),
+    BotCommand("report", "Report a message to admins"),
+    BotCommand("reports", "Turn reports on/off"),
+    BotCommand("setantiflood", "Toggle anti-flood"),
+    BotCommand("setantispam", "Toggle anti-spam"),
+    BotCommand("setcaptcha", "Configure the join captcha"),
+    BotCommand("lock", "Lock a content type"),
+    BotCommand("unlock", "Unlock a content type"),
+    BotCommand("locktypes", "List lockable content types"),
+    BotCommand("addblacklist", "Add a banned word"),
+    BotCommand("blacklist", "List banned words"),
+    BotCommand("rmblacklist", "Remove a banned word"),
+    BotCommand("save", "Save a note"),
+    BotCommand("get", "Retrieve a note"),
+    BotCommand("notes", "List all notes"),
+    BotCommand("clear", "Remove a note"),
+    BotCommand("filter", "Add an auto-reply filter"),
+    BotCommand("filters", "List active filters"),
+    BotCommand("stop", "Remove an auto-reply filter"),
+]
+
+_GROUP_COMMANDS = [c for c in _COMMANDS if c.command != "start"]
+
+
+async def _post_init(application: Application) -> None:
+    """
+    PTB post_init hook — publish the command list to Telegram on startup.
+
+    Without this the commands never appear in the client's ☰ menu, so every user
+    has to memorise the syntax; that is the biggest usability gap in classic
+    group-management bots. Registration is best-effort: if Telegram is slow or
+    unreachable the bot still runs, only the menu stays empty.
+    """
+    try:
+        await application.bot.set_my_commands(_COMMANDS)
+        await application.bot.set_my_commands(
+            _GROUP_COMMANDS, scope=BotCommandScopeAllGroupChats()
+        )
+        logger.info(f"Registered {len(_COMMANDS)} commands with Telegram.")
+    except Exception as e:
+        logger.warning(f"Could not register the command menu: {e}")
+    # Reference point for the uptime figure in /ping and /stats.
+    mark_started()
+
 
 def build_application() -> Application:
     """Build and configure the PTB Application with all registered handlers."""
     app = (
         ApplicationBuilder()
         .token(settings.BOT_TOKEN)
+        .post_init(_post_init)
         .build()
     )
 
+    # ── Onboarding ────────────────────────────────────────────────────────────
+    app.add_handler(CommandHandler("start", start_command))
+    app.add_handler(CallbackQueryHandler(menu_callback, pattern=r"^menu:"))
+    app.add_handler(CallbackQueryHandler(settings_callback, pattern=r"^cfg:"))
+    app.add_handler(CallbackQueryHandler(verify_callback, pattern=r"^captcha:"))
+
     # ── Information Commands ──────────────────────────────────────────────────
     app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CommandHandler("ping", ping_command))
     app.add_handler(CommandHandler("id", id_command))
     app.add_handler(CommandHandler("info", info_command))
     app.add_handler(CommandHandler("admins", admins_command))
+    app.add_handler(CommandHandler("stats", stats_command))
 
     # ── Moderation Commands ─────────────────────────────────────────────────────
     app.add_handler(CommandHandler("ban", ban_command))
@@ -108,6 +202,7 @@ def build_application() -> Application:
     # ── Group Protection Commands ─────────────────────────────────────────────
     app.add_handler(CommandHandler("setantiflood", setantiflood_command))
     app.add_handler(CommandHandler("setantispam", setantispam_command))
+    app.add_handler(CommandHandler("setcaptcha", setcaptcha_command))
     app.add_handler(CommandHandler("lock", lock_command))
     app.add_handler(CommandHandler("unlock", unlock_command))
     app.add_handler(CommandHandler("locktypes", locktypes_command))
@@ -151,6 +246,14 @@ def build_application() -> Application:
     # itself, which arrives as MY_CHAT_MEMBER and is handled in lifecycle.py).
     app.add_handler(
         ChatMemberHandler(handle_chat_member, ChatMemberHandler.CHAT_MEMBER, block=False),
+        group=1,
+    )
+
+    # ── Join Captcha (mute + challenge new members) ───────────────────────────
+    # Same CHAT_MEMBER stream as the welcome handler; independent so captcha
+    # failures never suppress a welcome message (and vice versa).
+    app.add_handler(
+        ChatMemberHandler(handle_captcha_join, ChatMemberHandler.CHAT_MEMBER, block=False),
         group=1,
     )
 

@@ -334,27 +334,6 @@ async def setrules_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     await update.effective_message.reply_text("Rules cleared." if text is None else "Group rules updated.")
 
 
-async def settings_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if await guard(update, context, "settings") is None:
-        return
-    chat = update.effective_chat
-    _, s = await _get_settings(chat.id)
-    if not s:
-        await update.effective_message.reply_text("Group is not registered yet. Please try again in a moment.")
-        return
-    tick = lambda b: "On" if b else "Off"  # noqa: E731
-    await update.effective_message.reply_html(
-        f"<b>Group Settings</b>\n\n"
-        f"Warn limit: <b>{s['warn_limit']}</b> <i>(/setwarnlimit N)</i>\n"
-        f"Welcome: {tick(s['welcome_enabled'])}\n"
-        f"Goodbye: {tick(s['goodbye_enabled'])}\n"
-        f"Anti-flood: {tick(s['anti_flood_enabled'])}\n"
-        f"Anti-spam: {tick(s['anti_spam_enabled'])}\n"
-        f"Reports: {tick(s['reports_enabled'])}\n"
-        f"Logging: {tick(s['log_enabled'])}\n"
-        f"Rules: {'set' if s['rules'] else 'not set'}")
-
-
 async def setwarnlimit_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await guard(update, context, "setwarnlimit") is None:
         return

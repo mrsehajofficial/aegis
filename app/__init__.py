@@ -1,1 +1,1 @@
-"""Aegis — Rose-style Telegram Group Management Bot."""
+"""Aegis — deterministic Telegram Group Management Bot."""
