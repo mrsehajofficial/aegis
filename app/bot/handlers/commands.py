@@ -81,6 +81,9 @@ def build_help_text() -> str:
         "/filters — List active filters\n"
         "/stop [keyword] — Remove a filter\n\n"
 
+        "<b>Migration</b> <i>(admins only)</i>\n"
+        "/importfromrose — Import a CSV of blacklist/filters/notes (reply to the file)\n\n"
+
         "<b>Reports</b>\n"
         "/report — Report a message to admins (reply to message)\n"
         "/setreports on|off — Toggle reports (admins only)\n\n"

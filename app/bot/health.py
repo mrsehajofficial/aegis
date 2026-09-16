@@ -67,6 +67,20 @@ async def _check_flood_store() -> Dict[str, object]:
     return info
 
 
+async def _check_reputation_store() -> Dict[str, object]:
+    """Report the fingerprint-network backend (same degradation rules as flood)."""
+    from app.anti_spam import reputation
+
+    store = reputation.get_reputation_store()
+    info: Dict[str, object] = {"backend": store.name, "ok": True}
+    try:
+        await store.ping()
+    except Exception as e:
+        info["ok"] = False
+        info["error"] = type(e).__name__
+    return info
+
+
 class HealthServer:
     """Minimal async HTTP server exposing the readiness report."""
 
@@ -113,6 +127,7 @@ class HealthServer:
         checks: Dict[str, object] = {
             "database": await _check_database(),
             "flood_store": await _check_flood_store(),
+            "reputation_store": await _check_reputation_store(),
         }
         for name, check in self._extra_checks.items():
             try:

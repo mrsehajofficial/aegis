@@ -74,6 +74,7 @@ from app.bot.handlers.notes import (
     clear_note_command,
     check_notes_in_message,
 )
+from app.bot.handlers.import_rose import importfromrose_command
 
 logger = logging.getLogger(__name__)
 
@@ -126,6 +127,7 @@ _COMMANDS = [
     BotCommand("filter", "Add an auto-reply filter"),
     BotCommand("filters", "List active filters"),
     BotCommand("stop", "Remove an auto-reply filter"),
+    BotCommand("importfromrose", "Migrate blacklist/filters/notes from a CSV"),
 ]
 
 _GROUP_COMMANDS = [c for c in _COMMANDS if c.command != "start"]
@@ -224,6 +226,18 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("filter", filter_command))
     app.add_handler(CommandHandler("filters", filters_command))
     app.add_handler(CommandHandler("stop", stop_command))
+
+    # ── Migration from MissRose ───────────────────────────────────────────────
+    # Two entry paths into one handler: the command sent as a document caption,
+    # and the command replying to a document sent separately.
+    app.add_handler(CommandHandler("importfromrose", importfromrose_command))
+    app.add_handler(
+        MessageHandler(
+            ptb_filters.Document.ALL
+            & ptb_filters.CaptionRegex(r"^/importfromrose\b"),
+            importfromrose_command,
+        )
+    )
 
     # ── Message Handlers (non-command text) ──────────────────────────────────
     # Filter auto-replies

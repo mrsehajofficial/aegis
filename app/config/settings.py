@@ -40,6 +40,23 @@ class Settings(BaseSettings):
     CAPTCHA_TIMEOUT_SECONDS: int = 120
     CAPTCHA_ACTION: str = "kick"  # "kick" | "ban"
 
+    # ── Opt-in reputation feed ────────────────────────────────────────────────
+    # Empty (the default) means a fully private instance: no outbound calls, no
+    # shared state, protection works offline. Point it at a shared feed to
+    # pre-warn every participating instance about a spam campaign that already
+    # hit another instance — the one feature that gets stronger with adoption.
+    # Only a salted fingerprint and a pseudonymous group token are ever sent.
+    REPUTATION_FEED_URL: str = ""       # e.g. "https://feed.example.com"
+    REPUTATION_FEED_TOKEN: str = ""     # optional bearer token for private feeds
+    REPUTATION_FEED_TIMEOUT: float = 3.0
+
+    # ── Version / update check ────────────────────────────────────────────────
+    # Anonymous GET against the public GitHub releases API so a distributed
+    # fleet knows when it has drifted. No instance data is sent. Turn it off for
+    # air-gapped or privacy-strict deployments; /version still works.
+    UPDATE_CHECK_ENABLED: bool = True
+    UPDATE_CHECK_REPO: str = "mrsehajofficial/aegis"
+
     @field_validator("SUPER_ADMIN_IDS", mode="before")
     @classmethod
     def parse_super_admins(cls, v: Union[str, List[int], int, None]) -> List[int]:

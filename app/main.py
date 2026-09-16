@@ -17,6 +17,10 @@ from app.config.settings import settings
 from app.bot.application import build_application
 from app.bot.health import HealthServer
 from app.anti_spam.flood import close_flood_store, init_flood_store
+from app.anti_spam.reputation import (
+    close_reputation_store,
+    init_reputation_store,
+)
 from app.database.connection import init_db, close_db
 
 # Configure logging
@@ -104,6 +108,10 @@ async def run_bot() -> None:
     flood_store = await init_flood_store()
     logger.info(f"Flood store backend: {flood_store.name}")
 
+    # The fingerprint network uses the same Redis instance when available.
+    rep_store = await init_reputation_store()
+    logger.info(f"Reputation store backend: {rep_store.name}")
+
     logger.info("Building application...")
     app: Application = build_application()
 
@@ -141,6 +149,7 @@ async def run_bot() -> None:
         await app.stop()
         await app.shutdown()
         await close_flood_store()
+        await close_reputation_store()
         await close_db()
         logger.info("Bot shutdown complete.")
 

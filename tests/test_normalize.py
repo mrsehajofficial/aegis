@@ -102,3 +102,21 @@ class TestNormalize:
 
     def test_ordinary_text_is_preserved(self):
         assert normalize("good morning everyone") == "good morning everyone"
+
+class TestUppercaseHomoglyphEvasion:
+    """Regression: case-folding must precede homoglyph mapping.
+
+    The homoglyph table only carries lowercase look-alikes, so a capital
+    Cyrillic А used to survive normalisation and dodge every match.
+    """
+
+    def test_capital_cyrillic_a_folds_to_latin(self):
+        assert "channel" in normalize("CH\u0410NNEL")
+
+    def test_capital_cyrillic_e_folds_to_latin(self):
+        assert "free" in normalize("FR\u0415\u0415")
+
+    def test_mixed_case_homoglyph_attack_matches_plain_text(self):
+        from app.anti_spam.reputation import fingerprint
+
+        assert fingerprint("JOIN MY CH\u0410NNEL") == fingerprint("join my channel")

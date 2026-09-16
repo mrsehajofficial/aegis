@@ -1,0 +1,53 @@
+name: Feature request
+description: Suggest a new capability or an improvement.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Aegis aims to be *deterministic protection* rather than a pile of commands,
+        so the most helpful requests describe the moderation problem you're trying
+        to solve — not just the command name you'd like to type.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe the situation in your group, not the solution.
+      placeholder: |
+        Spammers join, post a clean message, then edit a link in a few minutes
+        later. Mods only notice when someone complains.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like Aegis to do?
+      description: If you have a command syntax or UX in mind, sketch it here.
+      placeholder: |
+        Detect link-in-edit and delete automatically. A setting to opt into.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+      description: Including how other bots handle it, and why that isn't enough.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      description: Aegis is maintained by one person, and these constraints are deliberate.
+      options:
+        - label: This can work with no external service, no accounts and no telemetry beyond the existing opt-in fingerprint feed.
+          required: false
+        - label: This can be enabled per group by an admin rather than acting automatically (opt-in is the house rule).
+          required: false
+        - label: I understand this may not be accepted, and that's fine.
+          required: false

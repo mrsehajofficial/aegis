@@ -1,0 +1,112 @@
+name: Bug report
+description: Something in Aegis is broken or behaves unexpectedly.
+title: "[Bug] "
+labels: ["bug", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Because Aegis is self-hosted, the version and the
+        delivery mode in your answers below are usually what make a bug
+        reproducible for someone else — please fill them in.
+
+        **Do not paste your `BOT_TOKEN`.** If you need to share logs, redact it
+        first (it looks like `123456789:AAEexT8...`).
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you expected, and what actually happened.
+      placeholder: |
+        I ran /setcaptcha on and the group welcome message stopped working.
+        Welcome messages were fine before, they just stopped after that command.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The exact commands and button taps, in order.
+      placeholder: |
+        1. Add the bot to a test group as admin with Delete messages + Ban users
+        2. /setcaptcha on
+        3. New member joins
+        4. They tap the button — nothing happens
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Aegis version
+      description: Output of the `/version` command, or the git commit SHA you deployed.
+      placeholder: "0.1.0 / commit 01b843b"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: How are you running Aegis?
+      options:
+        - Docker Compose (docker compose up -d)
+        - Bare metal (python -m app.main)
+        - Other (describe below)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: delivery
+    attributes:
+      label: Delivery mode
+      description: Shown in the startup log — "Delivery mode: long polling" or "webhook".
+      options:
+        - Long polling (default)
+        - Webhook (WEBHOOK_URL set)
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      options:
+        - SQLite (default)
+        - PostgreSQL
+    validations:
+      required: true
+
+  - type: dropdown
+    id: redis
+    attributes:
+      label: Is Redis configured?
+      description: Whether `REDIS_URL` is set — it changes which flood/reputation backend is active.
+      options:
+        - "No (in-memory stores)"
+        - "Yes (REDIS_URL set)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: |
+        Run with `LOG_LEVEL=DEBUG` for more detail. The traceback and the few
+        lines before it are usually enough. Redact your token.
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and this isn't already reported.
+          required: true
+        - label: I removed my `BOT_TOKEN` and any private group/member details from logs.
+          required: true

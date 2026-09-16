@@ -16,6 +16,11 @@ from telegram import Message
 from telegram.ext import ContextTypes
 
 from app.anti_spam.flood import check_flood, reset_user
+from app.anti_spam.reputation import (
+    FLAG_THRESHOLD,
+    known_spam_groups,
+    record_spam,
+)
 from app.anti_spam.detector import (
     check_edited_spam,
     check_spam,
@@ -103,8 +108,26 @@ class AntiSpamChecker:
             for reason in check_text_abuse(text).reasons:
                 result.add(reason)
 
+            # Cross-group reputation: the fingerprint network. When the same
+            # message (by normalised fingerprint) was flagged as spam in enough
+            # *other* groups recently, it is spam here too — no local heuristic
+            # can be bypassed by keeping a message just under every threshold.
+            try:
+                known = await known_spam_groups(text, self.chat_id)
+            except Exception as e:  # never let the network block a message
+                logger.debug(f"Reputation check failed in chat {self.chat_id}: {e}")
+                known = 0
+            if known >= FLAG_THRESHOLD:
+                result.add(f"known spam pattern (flagged in {known} other groups)")
+
             if result.is_spam:
                 action_taken = await self._handle_spam(message, result.reasons)
+                # Confirmed verdicts grow the network, so other groups are
+                # pre-warned against this exact message.
+                try:
+                    await record_spam(self.chat_id, text)
+                except Exception as e:
+                    logger.debug(f"Reputation record failed in chat {self.chat_id}: {e}")
                 return action_taken
 
         return None

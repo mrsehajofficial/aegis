@@ -97,6 +97,10 @@ def normalize(text: str) -> str:
 
     Lossy by design: never display this, only match against it. The result is
     case-folded so callers can compare without lowercasing again.
+
+    Case-folding happens *before* homoglyph mapping on purpose: the homoglyph
+    table only carries lowercase look-alikes ("а", not "А"), so a capital
+    Cyrillic А must become lowercase first or it slips through unfounded.
     """
     if not text:
         return ""
@@ -104,10 +108,11 @@ def normalize(text: str) -> str:
     # keeps the homoglyph table below small.
     flat = unicodedata.normalize("NFKC", text)
     flat = strip_invisible(flat)
+    flat = flat.casefold()
     flat = map_homoglyphs(flat)
     flat = fold_leet(flat)
     flat = collapse_repeats(flat)
-    return flat.casefold()
+    return flat
 
 
 def combining_ratio(text: str) -> float:

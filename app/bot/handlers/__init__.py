@@ -41,6 +41,7 @@ from app.bot.handlers.filters import (
 from app.bot.handlers.lifecycle import handle_my_chat_member
 from app.bot.handlers.errors import error_handler
 from app.bot.handlers.tracking import track_members
+from app.bot.handlers.import_rose import importfromrose_command
 
 __all__ = [
     "help_command",
@@ -79,4 +80,5 @@ __all__ = [
     "handle_my_chat_member",
     "error_handler",
     "track_members",
+    "importfromrose_command",
 ]

@@ -110,7 +110,16 @@ async def setantispam_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         action = kwargs.get("spam_action", "delete")
         await update.effective_message.reply_html(f"<b>Anti-spam enabled.</b> Action: {action}")
     else:
-        await update.effective_message.reply_html("<b>Anti-spam disabled.</b>")
+        # Opt-out means opt-out: withdraw this group's fingerprints from the
+        # shared reputation network so it stops contributing and influencing
+        # other groups the moment protection is switched off.
+        from app.anti_spam.reputation import withdraw_chat
+
+        await withdraw_chat(chat.id)
+        await update.effective_message.reply_html(
+            "<b>Anti-spam disabled.</b>\nThis group has also been withdrawn from "
+            "the cross-group spam reputation network."
+        )
 
 
 async def lock_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

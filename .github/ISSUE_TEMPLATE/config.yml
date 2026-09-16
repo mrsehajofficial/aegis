@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Setup & self-hosting help
+    url: https://github.com/mrsehajofficial/aegis#quickstart
+    about: Install, configuration and Docker questions are answered in the README quickstart.
+  - name: Security vulnerability
+    url: https://github.com/mrsehajofficial/aegis/security/advisories/new
+    about: Please report security issues privately, never in a public issue.
