@@ -29,7 +29,7 @@ class Settings(BaseSettings):
 
     # Health endpoint for uptime monitors and container healthchecks.
     # Serves GET /health and GET / in both polling and webhook mode. 0 disables.
-    HEALTH_PORT: int = 8080
+    HEALTH_PORT: int = 9355
 
     # ── Shared state ──────────────────────────────────────────────────────────
     # When set, anti-flood counters are shared across every worker so protection
