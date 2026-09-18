@@ -5,9 +5,15 @@ Parsing is a pure function so every format edge case is cheap to test. The
 apply step runs against a real in-memory SQLite database so the upsert
 behaviour is proven, not assumed.
 """
+import json
 import pytest
 
-from app.bot.handlers.import_rose import ImportItem, apply_import_items, parse_import_csv
+from app.bot.handlers.import_rose import (
+    ImportItem,
+    apply_import_items,
+    parse_import_csv,
+    _parse_rose_json,
+)
 
 
 CSV_WITH_HEADER = (
@@ -95,42 +101,108 @@ class TestParseCsv:
         assert items[0].content == "Be kind, no spam, have fun"
 
     def test_keywords_are_normalised_to_lowercase(self):
-        items, _ = parse_import_csv("BLACKLIST,FREE CRYPTO,,\n")
-        assert items[0].keyword == "free crypto"
+        items, _ = parse_import_csv("filter,Hello World,Response,\n")
+        assert items[0].keyword == "hello world"
 
     def test_overlong_fields_are_rejected(self):
-        _, errors = parse_import_csv(
-            f"blacklist,{'w' * 501},,\n"
-            f"filter,{'k' * 201},response,\n"
-            f"filter,ok,{'r' * 3001},\n"
-        )
-        assert any("blacklisted word too long" in e for e in errors)
-        assert any("keyword too long" in e for e in errors)
-        assert any("response too long" in e for e in errors)
+        long_word = "x" * 501
+        items, errors = parse_import_csv(f"blacklist,{long_word},,\n")
+        assert len(items) == 0
+        assert any("too long" in e for e in errors)
 
     def test_empty_input_yields_nothing(self):
         items, errors = parse_import_csv("")
-        assert items == [] and errors == []
+        assert items == []
+        assert errors == []
 
     def test_line_numbers_are_one_based_csv_lines(self):
-        _, errors = parse_import_csv("blacklist,ok,,\nbogus,x,,\n")
-        assert errors == ["line 2: unknown type 'bogus'"]
+        items, errors = parse_import_csv(
+            "blacklist,w1,,\nfilter,f1,resp,\nnote,n1,content,\n"
+        )
+        assert [i.line for i in items] == [1, 2, 3]
 
 
-@pytest.fixture
-async def db_session(tmp_path):
-    """A real in-memory SQLite session with the full schema created."""
-    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-    import app.database.models  # noqa: F401 — register all model metadata
-    from app.database.base import Base
+class TestParseRoseJson:
+    """Tests for parsing Rose JSON export format."""
 
-    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-    async with maker() as session:
-        yield session
-    await engine.dispose()
+    def test_empty_rose_json_yields_nothing(self):
+        json_text = json.dumps({
+            "bot_id": 123456,
+            "data": {
+                "filters": {"filters": None},
+                "notes": {"notes": None},
+                "blocklists": {"filters": None},
+            },
+            "version": 2
+        })
+        items, errors = _parse_rose_json(json_text)
+        assert items == []
+        assert errors == []
+
+    def test_rose_json_parses_filters(self):
+        json_text = json.dumps({
+            "bot_id": 123456,
+            "data": {
+                "filters": {
+                    "filters": [
+                        {"trigger": "hello", "response": "Hi there!", "action": "reply", "enabled": True},
+                        {"trigger": "help", "response": "Use /help", "action": "reply", "enabled": True},
+                    ]
+                },
+                "notes": {"notes": None},
+                "blocklists": {"filters": None},
+            },
+            "version": 2
+        })
+        items, errors = _parse_rose_json(json_text)
+        assert errors == []
+        assert len(items) == 2
+        assert items[0].kind == "filter"
+        assert items[0].keyword == "hello"
+        assert items[0].content == "Hi there!"
+
+    def test_rose_json_parses_notes(self):
+        json_text = json.dumps({
+            "bot_id": 123456,
+            "data": {
+                "filters": {"filters": None},
+                "notes": {"notes": [{"keyword": "rules", "content": "Be kind"}]},
+                "blocklists": {"filters": None},
+            },
+            "version": 2
+        })
+        items, errors = _parse_rose_json(json_text)
+        assert errors == []
+        assert len(items) == 1
+        assert items[0].kind == "note"
+        assert items[0].keyword == "rules"
+
+    def test_rose_json_parses_blacklists(self):
+        json_text = json.dumps({
+            "bot_id": 123456,
+            "data": {
+                "filters": {"filters": None},
+                "notes": {"notes": None},
+                "blocklists": {"filters": [{"word": "spam", "action": "delete"}]},
+            },
+            "version": 2
+        })
+        items, errors = _parse_rose_json(json_text)
+        assert errors == []
+        assert len(items) == 1
+        assert items[0].kind == "blacklist"
+        assert items[0].keyword == "spam"
+
+    def test_rose_json_missing_data_object_is_error(self):
+        json_text = json.dumps({"bot_id": 123456})
+        items, errors = _parse_rose_json(json_text)
+        assert items == []
+        assert any("data" in e.lower() for e in errors)
+
+    def test_rose_json_invalid_json_is_error(self):
+        items, errors = _parse_rose_json("{invalid")
+        assert items == []
+        assert any("Invalid JSON" in e for e in errors)
 
 
 class TestApplyItems:

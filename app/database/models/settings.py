@@ -19,8 +19,8 @@ class GroupSettings(Base):
     )
 
     warn_limit: Mapped[int] = mapped_column(Integer, default=3, server_default="3", nullable=False)
-    welcome_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0", nullable=False)
-    goodbye_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0", nullable=False)
+    welcome_enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1", nullable=False)
+    goodbye_enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1", nullable=False)
     anti_flood_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0", nullable=False)
     anti_spam_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0", nullable=False)
     flood_msg_limit: Mapped[int] = mapped_column(Integer, default=5, server_default="5", nullable=False)

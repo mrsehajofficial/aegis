@@ -228,7 +228,7 @@ async def admins_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         if user.last_name:
             full_name += f" {user.last_name}"
         mention = f'<a href="tg://user?id={user.id}">{full_name}</a>'
-        role_label = "Owner" if admin.status == "creator" else "Admin"
+        role_label = "Owner" if admin.status.value == "owner" else "Admin"
         if user.username:
             lines.append(f"• <b>{role_label}</b>: {mention} (@{user.username})")
         else:

@@ -193,8 +193,8 @@ async def handle_captcha_join(update: Update, context: ContextTypes.DEFAULT_TYPE
         or user is None
         or user.is_bot
         or not _is_new_join(
-            cmu.old_chat_member.status if cmu.old_chat_member else "",
-            cmu.new_chat_member.status if cmu.new_chat_member else "",
+            cmu.old_chat_member.status.value if cmu.old_chat_member else "",
+            cmu.new_chat_member.status.value if cmu.new_chat_member else "",
         )
     ):
         return

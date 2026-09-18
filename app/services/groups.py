@@ -26,7 +26,17 @@ async def register_or_update_group(chat: Chat) -> int:
             type_=chat.type,
             username=chat.username,
         )
-        await settings_repo.get_or_create(group.id)
+        settings = await settings_repo.get_or_create(group.id)
+        # Enable welcome and goodbye messages by default for new groups
+        if not settings.welcome_enabled or not settings.goodbye_enabled:
+            await settings_repo.update(
+                group.id,
+                welcome_enabled=True,
+                goodbye_enabled=True,
+            )
+            logger.info(
+                f"Enabled welcome/goodbye messages for new group {chat.title!r} (id={chat.id})"
+            )
         await session.commit()
 
         logger.info(f"Group registered/updated: {chat.title!r} (telegram_id={chat.id}, db_id={group.id})")

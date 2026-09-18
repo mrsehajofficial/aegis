@@ -8,6 +8,10 @@ the individual test modules stay focused on behaviour.
 """
 import pytest
 
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from app.database.base import Base
+
 
 class FakeClock:
     """A monotonic clock that only moves when a test tells it to."""
@@ -26,3 +30,17 @@ class FakeClock:
 def clock() -> FakeClock:
     """A deterministic stand-in for ``time.monotonic()``."""
     return FakeClock()
+
+
+@pytest.fixture
+async def db_session() -> AsyncSession:
+    """Provide a clean in-memory SQLite session for database tests."""
+    import app.database.models  # noqa: F401 — register all model metadata
+
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async with maker() as session:
+        yield session
+    await engine.dispose()

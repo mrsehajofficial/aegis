@@ -21,8 +21,8 @@ async def handle_my_chat_member(update: Update, context: ContextTypes.DEFAULT_TY
         return
 
     chat = change.chat
-    new_status = change.new_chat_member.status
-    old_status = change.old_chat_member.status
+    new_status = change.new_chat_member.status.value
+    old_status = change.old_chat_member.status.value
 
     # Only care about groups and supergroups
     if chat.type not in _GROUP_TYPES:

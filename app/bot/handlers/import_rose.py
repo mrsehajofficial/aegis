@@ -3,11 +3,11 @@ import_rose.py — Migrate from MissRose with one CSV upload.
 
 Switching bots is the real battleground: nobody leaves Rose over features
 while re-entering hundreds of blacklisted words by hand. This command imports
-a CSV file into Aegis's existing blacklist / filter / note repositories, so an
-admin can be fully migrated in under a minute.
+a CSV file or Rose JSON export into Aegis's existing blacklist / filter / note
+repositories, so an admin can be fully migrated in under a minute.
 
-Usage — reply to a .csv document with /importfromrose, or send the document
-with /importfromrose as its caption.
+Usage — reply to a .csv or .json document with /importfromrose, or send the
+document with /importfromrose as its caption.
 
 CSV format (header row optional, columns in this order):
 
@@ -23,12 +23,20 @@ CSV format (header row optional, columns in this order):
 * ``action`` — blacklist consequence: delete (default), warn, mute or ban.
   Ignored for filters and notes.
 
+Rose JSON format (exported from MissRose bot):
+
+    The JSON file exported from MissRose contains:
+    - data.filters.filters: array of filter objects
+    - data.notes.notes: array of note objects
+    - data.blocklists.filters: array of blacklist words
+
 Upsert semantics: re-importing updates existing rows instead of failing, so a
 partially-successful first import can simply be fixed and re-run.
 """
 import csv
 import html
 import io
+import json
 import logging
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
@@ -92,6 +100,161 @@ class ImportItem:
 
 def _norm_cell(cell: Optional[str]) -> str:
     return (cell or "").strip()
+
+
+@dataclass
+class RoseFilter:
+    """Structure for a filter from Rose JSON export."""
+    trigger: str
+    response: str
+    action: str = "reply"
+    enabled: bool = True
+
+
+@dataclass
+class RoseNote:
+    """Structure for a note from Rose JSON export."""
+    keyword: str
+    content: str
+
+
+@dataclass
+class RoseBlacklist:
+    """Structure for a blacklist item from Rose JSON export."""
+    word: str
+    action: str = "delete"
+
+
+def _parse_rose_json(text: str) -> Tuple[List[ImportItem], List[str]]:
+    """
+    Parse Rose JSON export text into import items plus error lines.
+
+    Rose JSON structure:
+    - data.filters.filters: array of {trigger, response, action, enabled}
+    - data.notes.notes: array of {keyword, content}
+    - data.blocklists.filters: array of {word, action}
+    """
+    items: List[ImportItem] = []
+    errors: List[str] = []
+
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as e:
+        errors.append(f"Invalid JSON: {e}")
+        return items, errors
+
+    if not isinstance(data, dict):
+        errors.append("JSON root must be an object")
+        return items, errors
+
+    if "data" not in data:
+        errors.append("Missing 'data' object in Rose export")
+        return items, errors
+
+    rose_data = data.get("data", {})
+    if not isinstance(rose_data, dict):
+        errors.append("Invalid 'data' object in Rose export")
+        return items, errors
+
+    line_num = 0
+
+    # Parse filters
+    filters_data = rose_data.get("filters", {})
+    if isinstance(filters_data, dict):
+        filters_list = filters_data.get("filters")
+        if isinstance(filters_list, list):
+            for idx, filter_data in enumerate(filters_list, start=1):
+                line_num += 1
+                if not isinstance(filter_data, dict):
+                    errors.append(f"line {line_num}: filter entry must be an object")
+                    continue
+
+                trigger = _norm_cell(filter_data.get("trigger"))
+                response = _norm_cell(filter_data.get("response"))
+                action = _norm_cell(filter_data.get("action", "reply"))
+                enabled = filter_data.get("enabled", True)
+
+                if not trigger:
+                    errors.append(f"line {line_num}: filter missing trigger")
+                    continue
+                if not response:
+                    errors.append(f"line {line_num}: filter rows need content in 'response'")
+                    continue
+
+                # Map Rose actions to Aegis actions
+                if action not in ("reply", "delete", "warn", "mute", "ban"):
+                    action = "reply"
+
+                items.append(ImportItem(
+                    kind="filter",
+                    keyword=trigger,
+                    content=response,
+                    action=action,
+                    line=line_num
+                ))
+
+    # Parse notes
+    notes_data = rose_data.get("notes", {})
+    if isinstance(notes_data, dict):
+        notes_list = notes_data.get("notes")
+        if isinstance(notes_list, list):
+            for idx, note_data in enumerate(notes_list, start=1):
+                line_num += 1
+                if not isinstance(note_data, dict):
+                    errors.append(f"line {line_num}: note entry must be an object")
+                    continue
+
+                keyword = _norm_cell(note_data.get("keyword"))
+                content = _norm_cell(note_data.get("content"))
+
+                if not keyword:
+                    errors.append(f"line {line_num}: note missing keyword")
+                    continue
+                if not content:
+                    errors.append(f"line {line_num}: note rows need content")
+                    continue
+
+                items.append(ImportItem(
+                    kind="note",
+                    keyword=keyword,
+                    content=content,
+                    action="",
+                    line=line_num
+                ))
+
+    # Parse blocklists (blacklist)
+    blocklists_data = rose_data.get("blocklists", {})
+    if isinstance(blocklists_data, dict):
+        blocklists_list = blocklists_data.get("filters")
+        if isinstance(blocklists_list, list):
+            for idx, bl_data in enumerate(blocklists_list, start=1):
+                line_num += 1
+                if not isinstance(bl_data, dict):
+                    errors.append(f"line {line_num}: blacklist entry must be an object")
+                    continue
+
+                word = _norm_cell(bl_data.get("word"))
+                action = _norm_cell(bl_data.get("action", "delete"))
+
+                if not word:
+                    errors.append(f"line {line_num}: blacklist missing word")
+                    continue
+
+                # Map Rose blacklist actions to Aegis actions
+                action = _ACTION_ALIASES.get(action.lower(), action.lower())
+                if action not in BLACKLIST_ACTIONS:
+                    errors.append(f"line {line_num}: unknown action '{bl_data.get('action')}'")
+                    continue
+
+                items.append(ImportItem(
+                    kind="blacklist",
+                    keyword=word,
+                    content="",
+                    action=action,
+                    line=line_num
+                ))
+
+    return items, errors
 
 
 def parse_import_csv(text: str) -> Tuple[List[ImportItem], List[str]]:
@@ -206,12 +369,17 @@ async def apply_import_items(session, group_id: int, items: List[ImportItem]) ->
 def _usage_text() -> str:
     return (
         "<b>Migrate from Rose</b>\n\n"
-        "Reply to a CSV document with this command (or send the document with "
-        "/importfromrose as its caption). Format:\n\n"
+        "Reply to a CSV or JSON document with this command (or send the document with "
+        "/importfromrose as its caption).\n\n"
+        "CSV format:\n"
         "<code>type,keyword,content,action</code>\n"
         "<code>blacklist,free crypto,,delete</code>\n"
         "<code>filter,hello,Hi there! Welcome,reply</code>\n"
         "<code>note,rules,Be kind to each other,</code>\n\n"
+        "Rose JSON format (exported from MissRose bot):\n"
+        "• Filters: data.filters.filters array\n"
+        "• Notes: data.notes.notes array\n"
+        "• Blacklist: data.blocklists.filters array\n\n"
         "• type: blacklist (aliases: banned, blocklist), filter (trigger), "
         "note (saved)\n"
         "• action: delete (default), warn, mute, ban — blacklist rows only\n\n"
@@ -235,7 +403,7 @@ async def _read_document(document, context) -> Tuple[Optional[str], str]:
 
 
 async def importfromrose_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle /importfromrose against an uploaded CSV document."""
+    """Handle /importfromrose against an uploaded CSV or JSON document."""
     if await guard(update, context, "importfromrose") is None:
         return
     chat = update.effective_chat
@@ -253,14 +421,22 @@ async def importfromrose_command(update: Update, context: ContextTypes.DEFAULT_T
         await msg.reply_html(_usage_text())
         return
 
-    csv_text, error = await _read_document(document, context)
+    text, error = await _read_document(document, context)
     if error:
         await msg.reply_html(f"<b>Import failed.</b>\n{html.escape(error)}")
         return
 
-    items, errors = parse_import_csv(csv_text or "")
+    # Detect format: JSON if it starts with '{' or '[', otherwise CSV
+    content = text or ""
+    if content.strip().startswith(("{", "[")):
+        items, errors = _parse_rose_json(content)
+        source_type = "Rose JSON"
+    else:
+        items, errors = parse_import_csv(content)
+        source_type = "CSV"
+
     if not items:
-        lines = ["<b>Nothing to import.</b>"]
+        lines = [f"<b>Nothing to import from {source_type}.</b>"]
         lines += [f"• {html.escape(e)}" for e in errors[:5]]
         if len(errors) > 5:
             lines.append(f"… and {len(errors) - 5} more problems")
@@ -278,11 +454,11 @@ async def importfromrose_command(update: Update, context: ContextTypes.DEFAULT_T
         await session.commit()
 
     logger.info(
-        f"Rose import in chat {chat.id}: {counts} written, "
+        f"Rose import in chat {chat.id} ({source_type}): {counts} written, "
         f"{len(errors)} rows skipped"
     )
     lines = [
-        "<b>Migration from Rose complete.</b>",
+        f"<b>Migration from Rose ({source_type}) complete.</b>",
         f"• Blacklist words: <b>{counts['blacklist']}</b>",
         f"• Filters: <b>{counts['filter']}</b>",
         f"• Notes: <b>{counts['note']}</b>",

@@ -283,8 +283,8 @@ async def handle_chat_member(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if chat is None or chat.type not in (Chat.GROUP, Chat.SUPERGROUP):
         return
 
-    old_status = cmu.old_chat_member.status if cmu.old_chat_member else ""
-    new_status = cmu.new_chat_member.status if cmu.new_chat_member else ""
+    old_status = (cmu.old_chat_member.status.value if cmu.old_chat_member else "")
+    new_status = (cmu.new_chat_member.status.value if cmu.new_chat_member else "")
     name = _display_name(cmu.user)
 
     if old_status in ("left", "kicked") and new_status in ("member", "administrator", "restricted"):

@@ -1,0 +1,340 @@
+{
+  "bot_id": 609517172,
+  "data": {
+    "admin": {
+      "admin_error_disable": false,
+      "anon_admin": false,
+      "legacy_admin": false
+    },
+    "antiflood": {
+      "action": "ban",
+      "action_duration": 0,
+      "flood_clear": false,
+      "flood_limit": 0,
+      "flood_timer": 0,
+      "flood_timer_limit": 0
+    },
+    "blocklists": {
+      "action": "nothing",
+      "action_duration": 0,
+      "default_reason": "",
+      "filters": null,
+      "should_delete": true
+    },
+    "clean_command": {
+      "command_types": {
+        "admin": {
+          "clean": false
+        },
+        "all": {
+          "clean": false
+        },
+        "other": {
+          "clean": false
+        },
+        "user": {
+          "clean": false
+        }
+      }
+    },
+    "clean_service": {
+      "service_types": {
+        "all": {
+          "clean": false
+        },
+        "join": {
+          "clean": false
+        },
+        "leave": {
+          "clean": false
+        },
+        "other": {
+          "clean": false
+        },
+        "photo": {
+          "clean": false
+        },
+        "pin": {
+          "clean": false
+        },
+        "title": {
+          "clean": false
+        },
+        "videochat": {
+          "clean": false
+        }
+      }
+    },
+    "disabled": {
+      "disable_admin": false,
+      "disabled": null,
+      "should_delete": false
+    },
+    "filters": {
+      "filters": null
+    },
+    "greetings": {
+      "captcha_rules": false,
+      "goodbye": {
+        "data_id": "",
+        "text": "",
+        "type": 0
+      },
+      "kick_after": 300,
+      "mute_for": 0,
+      "mute_mode": "button",
+      "mute_text": "",
+      "should_clean": false,
+      "should_goodbye": true,
+      "should_kick": false,
+      "should_mute": false,
+      "should_welcome": true,
+      "welcome": {
+        "data_id": "",
+        "text": "",
+        "type": 0
+      }
+    },
+    "locks": {
+      "allowlisted_url": null,
+      "lock_warns": false,
+      "locks": {
+        "album": {
+          "locked": false,
+          "reason": ""
+        },
+        "all": {
+          "locked": false,
+          "reason": ""
+        },
+        "anonchannel": {
+          "locked": false,
+          "reason": ""
+        },
+        "audio": {
+          "locked": false,
+          "reason": ""
+        },
+        "bot": {
+          "locked": false,
+          "reason": ""
+        },
+        "botlink": {
+          "locked": false,
+          "reason": ""
+        },
+        "button": {
+          "locked": false,
+          "reason": ""
+        },
+        "cashtag": {
+          "locked": false,
+          "reason": ""
+        },
+        "checklist": {
+          "locked": false,
+          "reason": ""
+        },
+        "cjk": {
+          "locked": false,
+          "reason": ""
+        },
+        "collage": {
+          "locked": false,
+          "reason": ""
+        },
+        "command": {
+          "locked": false,
+          "reason": ""
+        },
+        "comment": {
+          "locked": false,
+          "reason": ""
+        },
+        "contact": {
+          "locked": false,
+          "reason": ""
+        },
+        "cyrillic": {
+          "locked": false,
+          "reason": ""
+        },
+        "document": {
+          "locked": false,
+          "reason": ""
+        },
+        "email": {
+          "locked": false,
+          "reason": ""
+        },
+        "emoji": {
+          "locked": false,
+          "reason": ""
+        },
+        "emojicustom": {
+          "locked": false,
+          "reason": ""
+        },
+        "emojigame": {
+          "locked": false,
+          "reason": ""
+        },
+        "emojionly": {
+          "locked": false,
+          "reason": ""
+        },
+        "externalreply": {
+          "locked": false,
+          "reason": ""
+        },
+        "forward": {
+          "locked": false,
+          "reason": ""
+        },
+        "forwardbot": {
+          "locked": false,
+          "reason": ""
+        },
+        "forwardchannel": {
+          "locked": false,
+          "reason": ""
+        },
+        "forwardstory": {
+          "locked": false,
+          "reason": ""
+        },
+        "forwarduser": {
+          "locked": false,
+          "reason": ""
+        },
+        "game": {
+          "locked": false,
+          "reason": ""
+        },
+        "gif": {
+          "locked": false,
+          "reason": ""
+        },
+        "guestbot": {
+          "locked": false,
+          "reason": ""
+        },
+        "inline": {
+          "locked": false,
+          "reason": ""
+        },
+        "invitelink": {
+          "locked": false,
+          "reason": ""
+        },
+        "location": {
+          "locked": false,
+          "reason": ""
+        },
+        "outsidereaction": {
+          "locked": false,
+          "reason": ""
+        },
+        "phone": {
+          "locked": false,
+          "reason": ""
+        },
+        "photo": {
+          "locked": false,
+          "reason": ""
+        },
+        "poll": {
+          "locked": false,
+          "reason": ""
+        },
+        "reaction": {
+          "locked": false,
+          "reason": ""
+        },
+        "richmessage": {
+          "locked": false,
+          "reason": ""
+        },
+        "rtl": {
+          "locked": false,
+          "reason": ""
+        },
+        "slideshow": {
+          "locked": false,
+          "reason": ""
+        },
+        "spoiler": {
+          "locked": false,
+          "reason": ""
+        },
+        "sticker": {
+          "locked": false,
+          "reason": ""
+        },
+        "stickeranimated": {
+          "locked": false,
+          "reason": ""
+        },
+        "stickerpremium": {
+          "locked": false,
+          "reason": ""
+        },
+        "text": {
+          "locked": false,
+          "reason": ""
+        },
+        "url": {
+          "locked": false,
+          "reason": ""
+        },
+        "video": {
+          "locked": false,
+          "reason": ""
+        },
+        "videonote": {
+          "locked": false,
+          "reason": ""
+        },
+        "voice": {
+          "locked": false,
+          "reason": ""
+        },
+        "zalgo": {
+          "locked": false,
+          "reason": ""
+        }
+      }
+    },
+    "notes": {
+      "notes": null,
+      "private_notes": false
+    },
+    "pins": {
+      "antichannelpin": false,
+      "cleanlinked": false
+    },
+    "raids": {
+      "raid_mode_action_duration": 3600,
+      "raid_mode_auto_limit": 0,
+      "raid_mode_duration": 21600
+    },
+    "reports": {
+      "disable_reports": false
+    },
+    "rules": {
+      "button_name": "",
+      "content": "",
+      "send_to_chat": false
+    },
+    "translations": {
+      "lang": "en-GB"
+    },
+    "warns": {
+      "action": "ban",
+      "action_duration": 0,
+      "warn_for": 0,
+      "warn_limit": 3
+    }
+  },
+  "version": 2
+}
