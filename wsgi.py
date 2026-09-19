@@ -1,19 +1,18 @@
 """
 WSGI entry point for PythonAnywhere (or any WSGI server).
 
-Aegis is an async python-telegram-bot application, not a Flask app, so we
-can't expose it directly as ``application``. Instead:
+Runs both the Telegram Bot and the Mini App / API Server on a SINGLE
+PythonAnywhere account (including the free tier) sharing the exact same SQLite database.
 
-* We run ``app.main.run_bot()`` (the async coroutine that builds and starts
-  the bot) on its own event loop inside a dedicated daemon thread, started
-  as soon as this file is imported by the WSGI server.
-* The WSGI ``application`` callable just serves a tiny status response.
-
-Notes for PythonAnywhere:
-* Set the project's virtualenv in the Web tab (it must contain
-  python-telegram-bot, pydantic-settings, sqlalchemy, aiosqlite, etc.).
-* ``HEALTH_PORT`` cannot be used on PythonAnywhere (no outbound listeners);
-  add ``HEALTH_PORT=0`` to the project ``.env`` to disable it cleanly.
+How it works:
+1. When PythonAnywhere imports this file, the Telegram Bot starts in a background
+   daemon thread with its own asyncio event loop (handling polling/updates).
+2. The WSGI `application` callable dispatches web requests to the FastAPI app:
+   - GET /miniapp          -> serves the Mini App Dashboard UI
+   - GET /miniapp/<assets> -> serves static css/js
+   - GET /health           -> status check
+   - /api/v1/...           -> dashboard API calls
+   - /                     -> friendly status page
 """
 import asyncio
 import os
@@ -23,8 +22,6 @@ import traceback
 
 # On PythonAnywhere the WSGI file lives in /var/www/ (not the project), so the
 # project path is hardcoded there; fall back to this file's location locally.
-# NOTE: do NOT chdir based on __file__ on the server — it would override the
-# correct working directory and break .env loading.
 PROJECT_DIR = "/home/aegistelebot/aegis"
 
 if not os.path.isdir(PROJECT_DIR):
@@ -64,19 +61,98 @@ def start_aegis_once() -> None:
     threading.Thread(target=_run_bot, name="aegis-bot", daemon=True).start()
 
 
-def application(environ, start_response):
-    """Minimal WSGI app: reports status and keeps the bot thread alive."""
-    start_aegis_once()  # safety net; normally already started at import
+# ── WSGI Adapter for FastAPI Mini App Server ──────────────────────────────────
+def _create_wsgi_app():
+    """Wrap the FastAPI application in a pure-Python WSGI adapter."""
+    from app.api.server import api_app
 
-    body = b"Aegis Telegram Bot is running."
-    start_response(
-        "200 OK",
-        [
-            ("Content-Type", "text/plain"),
-            ("Content-Length", str(len(body))),
-        ],
-    )
-    return [body]
+    def wsgi_handler(environ, start_response):
+        path = environ.get("PATH_INFO", "/")
+        if not path or path == "/":
+            start_aegis_once()
+            body = (
+                b"Aegis Telegram Bot & Mini App are running.\n\n"
+                b"- Dashboard: /miniapp\n"
+                b"- Health:    /health\n"
+            )
+            start_response(
+                "200 OK",
+                [
+                    ("Content-Type", "text/plain; charset=utf-8"),
+                    ("Content-Length", str(len(body))),
+                ],
+            )
+            return [body]
+
+        query_string = environ.get("QUERY_STRING", "").encode("latin-1")
+        method = environ.get("REQUEST_METHOD", "GET")
+        headers = []
+        for key, value in environ.items():
+            if key.startswith("HTTP_"):
+                header_name = key[5:].replace("_", "-").lower().encode("latin-1")
+                headers.append((header_name, str(value).encode("latin-1")))
+            elif key == "CONTENT_TYPE" and value:
+                headers.append((b"content-type", str(value).encode("latin-1")))
+            elif key == "CONTENT_LENGTH" and value:
+                headers.append((b"content-length", str(value).encode("latin-1")))
+
+        body_file = environ.get("wsgi.input")
+        try:
+            content_length = int(environ.get("CONTENT_LENGTH", 0) or 0)
+        except ValueError:
+            content_length = 0
+        body_bytes = body_file.read(content_length) if body_file and content_length > 0 else b""
+
+        scope = {
+            "type": "http",
+            "asgi": {"version": "3.0"},
+            "http_version": "1.1",
+            "method": method,
+            "path": path,
+            "raw_path": path.encode("latin-1"),
+            "query_string": query_string,
+            "headers": headers,
+        }
+
+        read_done = False
+
+        async def receive():
+            nonlocal read_done
+            if not read_done:
+                read_done = True
+                return {"type": "http.request", "body": body_bytes, "more_body": False}
+            return {"type": "http.request", "body": b"", "more_body": False}
+
+        status_code = [500]
+        response_headers = []
+        response_body = []
+
+        async def send(message):
+            if message["type"] == "http.response.start":
+                status_code[0] = message["status"]
+                for k, v in message.get("headers", []):
+                    response_headers.append((k.decode("latin-1"), v.decode("latin-1")))
+            elif message["type"] == "http.response.body":
+                b = message.get("body", b"")
+                if b:
+                    response_body.append(b)
+
+        asyncio.run(api_app(scope, receive, send))
+
+        status_line = f"{status_code[0]} OK" if status_code[0] == 200 else f"{status_code[0]} Status"
+        start_response(status_line, response_headers)
+        return response_body
+
+    return wsgi_handler
+
+
+_app_callable = _create_wsgi_app()
+
+
+def application(environ, start_response):
+    """Main WSGI entry point invoked by PythonAnywhere."""
+    start_aegis_once()
+    return _app_callable(environ, start_response)
 
 
 # Start the bot as soon as the WSGI file is imported (uWSGI worker boot /

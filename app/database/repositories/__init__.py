@@ -13,3 +13,4 @@ __all__ = [
     "AuditLogRepository",
     "WarningRepository",
 ]
+from app.database.repositories.filters import FilterRepository
