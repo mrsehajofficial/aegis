@@ -140,3 +140,46 @@ def longest_repeat_run(text: str) -> int:
         previous = ch
         best = max(best, run)
     return best
+
+
+def contains_normalized_word(
+    normalized_text: str,
+    normalized_word: str,
+    *,
+    word_boundary: bool = True,
+) -> bool:
+    """
+    Check whether a normalised blacklist word appears in normalised text.
+
+    Args:
+        normalized_text: Already-normalised message text (output of :func:`normalize`).
+        normalized_word: Already-normalised blacklist entry (stored ``normalized_word``).
+        word_boundary: If True, require the match to start at a word boundary
+            (after whitespace, punctuation, or string start) so that ``"ass"`` does
+            not trigger on ``"password"``. If False, the old substring behaviour is
+            preserved for callers that explicitly want it.
+
+    Returns:
+        True when the word is found under the chosen rule.
+    """
+    if not normalized_text or not normalized_word:
+        return False
+    if len(normalized_word) > len(normalized_text):
+        return False
+
+    # Single-character words cannot satisfy a word boundary sensibly — they would
+    # match almost every token — so fall back to substring for those.
+    if len(normalized_word) <= 1:
+        return normalized_word in normalized_text
+
+    if word_boundary:
+        # A word boundary is: start of string, or a character that is not a letter
+        # or digit immediately before the match (whitespace, punctuation, etc.).
+        for i in range(len(normalized_text) - len(normalized_word) + 1):
+            if normalized_text[i:i + len(normalized_word)] != normalized_word:
+                continue
+            if i == 0 or not normalized_text[i - 1].isalnum():
+                return True
+        return False
+
+    return normalized_word in normalized_text

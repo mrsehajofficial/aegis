@@ -13,7 +13,7 @@ from app.database.repositories.settings import SettingsRepository
 from app.database.repositories.protection import BlacklistRepository
 from app.bot.helpers.ensure_group import guard
 from app.bot.middleware.auth import is_admin_or_above
-from app.anti_spam.normalize import normalize
+from app.anti_spam.normalize import normalize, contains_normalized_word
 
 logger = logging.getLogger(__name__)
 
@@ -264,16 +264,19 @@ async def check_protection(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             if member and member.role in ("admin", "owner"):
                 return
             settings = await SettingsRepository(session).get_by_group_id(g.id)
-            # Match against the *normalised* form so invisible characters,
-            # homoglyphs and leetspeak cannot smuggle a banned word through:
-            # "bаdword" (Cyrillic а) is not the string "badword".
+            # Match against pre-normalised blacklist entries.
+            # The stored ``normalized_word`` avoids re-normalising every entry on
+            # every message, and :func:`contains_normalized_word` enforces a word
+            # boundary so that ``"ass"`` does not trigger on ``"password"``.
             raw_text = message.text or message.caption or ""
             if raw_text:
                 normalised = normalize(raw_text)
                 bl_words = await BlacklistRepository(session).get_by_group(g.id)
                 for bl_word in bl_words:
-                    needle = normalize(bl_word.word)
-                    if needle and needle in normalised:
+                    # Use the pre-computed normalized form if available, otherwise
+                    # compute it (handles legacy rows before the column was added).
+                    needle = bl_word.normalized_word or normalize(bl_word.word)
+                    if needle and contains_normalized_word(normalised, needle):
                         await _handle_blacklist_word(message, context, bl_word.word, bl_word.action)
                         return
             if settings and (settings.anti_flood_enabled or settings.anti_spam_enabled):

@@ -1,8 +1,9 @@
 from typing import Optional, Sequence
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.models.protection import Blacklist, Note
 from app.database.repositories.base import BaseRepository
+from app.anti_spam.normalize import normalize
 
 
 class BlacklistRepository(BaseRepository[Blacklist]):
@@ -26,9 +27,16 @@ class BlacklistRepository(BaseRepository[Blacklist]):
         existing = await self.get_word(group_id, word)
         if existing:
             existing.action = action
+            existing.normalized_word = normalize(word)
             await self.session.flush()
             return existing
-        bl = Blacklist(group_id=group_id, word=word.lower().strip(), action=action)
+        normalized = normalize(word)
+        bl = Blacklist(
+            group_id=group_id,
+            word=word.lower().strip(),
+            normalized_word=normalized,
+            action=action,
+        )
         self.session.add(bl)
         await self.session.flush()
         return bl
@@ -48,6 +56,26 @@ class BlacklistRepository(BaseRepository[Blacklist]):
         )
         await self.session.flush()
         return result.rowcount
+
+    async def update_normalized_forms(self, group_id: int) -> int:
+        """
+        Backfill normalized_word for existing blacklist entries that lack it.
+        Useful for migrating old data after adding the column.
+        Requires that at least one row exists so SQLAlchemy can emit server_default.
+        """
+        from sqlalchemy import update
+        # Fetch rows that need normalization
+        result = await self.session.execute(
+            select(Blacklist).where(
+                Blacklist.group_id == group_id,
+                Blacklist.normalized_word.is_(None)
+            )
+        )
+        rows = result.scalars().all()
+        for row in rows:
+            row.normalized_word = normalize(row.word)
+        await self.session.flush()
+        return len(rows)
 
 
 class NoteRepository(BaseRepository[Note]):

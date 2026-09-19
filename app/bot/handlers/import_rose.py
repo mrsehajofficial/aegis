@@ -47,6 +47,7 @@ from telegram.ext import ContextTypes
 
 from app.database.connection import get_session
 from app.database.models.filter import Filter
+from app.database.models.protection import Blacklist
 from app.database.base import utc_now
 from app.database.repositories.groups import GroupRepository
 from app.database.repositories.protection import (
@@ -327,43 +328,108 @@ async def apply_import_items(session, group_id: int, items: List[ImportItem]) ->
     Runs inside the caller's session so the whole import is one transaction:
     a failure partway rolls back everything instead of leaving a half-migrated
     group. Returns per-kind counts of written rows.
+
+    Uses bulk operations for blacklists to avoid N+1 query patterns on large
+    imports (Rose exports can contain thousands of words).
     """
+    from sqlalchemy import select
+    from sqlalchemy.dialects.postgresql import insert as pg_insert
+    from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+
     counts = {"blacklist": 0, "filter": 0, "note": 0}
 
     bl_repo = BlacklistRepository(session)
     note_repo = NoteRepository(session)
 
-    for item in items:
-        if item.kind == "blacklist":
-            await bl_repo.add_word(group_id, item.keyword, item.action)
-        elif item.kind == "filter":
-            # Manual upsert mirrors filter_command's semantics.
-            q = await session.execute(
-                select(Filter).where(
-                    Filter.group_id == group_id,
-                    Filter.trigger == item.keyword,
+    # Batch blacklist items for bulk upsert
+    blacklist_items = [i for i in items if i.kind == "blacklist"]
+    filter_items = [i for i in items if i.kind == "filter"]
+    note_items = [i for i in items if i.kind == "note"]
+
+    if blacklist_items:
+        # Use bulk upsert for blacklists — much faster than one query per word
+        await _bulk_upsert_blacklist(session, group_id, blacklist_items)
+        counts["blacklist"] = len(blacklist_items)
+
+    for item in filter_items:
+        # Manual upsert mirrors filter_command's semantics.
+        q = await session.execute(
+            select(Filter).where(
+                Filter.group_id == group_id,
+                Filter.trigger == item.keyword,
+            )
+        )
+        f = q.scalar_one_or_none()
+        if f is None:
+            session.add(
+                Filter(
+                    group_id=group_id,
+                    trigger=item.keyword,
+                    response=item.content,
+                    enabled=True,
+                    created_at=utc_now(),
                 )
             )
-            f = q.scalar_one_or_none()
-            if f is None:
-                session.add(
-                    Filter(
-                        group_id=group_id,
-                        trigger=item.keyword,
-                        response=item.content,
-                        enabled=True,
-                        created_at=utc_now(),
-                    )
-                )
-            else:
-                f.response = item.content
-                f.enabled = True
         else:
-            await note_repo.save_note(group_id, item.keyword, item.content)
-        counts[item.kind] += 1
+            f.response = item.content
+            f.enabled = True
+        counts["filter"] += 1
+
+    for item in note_items:
+        await note_repo.save_note(group_id, item.keyword, item.content)
+        counts["note"] += 1
 
     await session.flush()
     return counts
+
+
+async def _bulk_upsert_blacklist(session, group_id: int, items: List[ImportItem]) -> None:
+    """
+    Bulk upsert blacklist words using INSERT ... ON CONFLICT.
+
+    Each word is normalised at write time so the hot path (message checking)
+    does not need to re-normalise every entry.
+    """
+    from app.anti_spam.normalize import normalize
+    from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+
+    # Build payload with pre-computed normalized forms
+    payload = [
+        {
+            "group_id": group_id,
+            "word": item.keyword.lower().strip(),
+            "normalized_word": normalize(item.keyword),
+            "action": item.action,
+        }
+        for item in items
+    ]
+
+    # Detect dialect and use appropriate bulk insert
+    dialect_name = session.bind.dialect.name if session.bind else "sqlite"
+
+    if dialect_name == "postgresql":
+        stmt = pg_insert(Blacklist).values(payload)
+        upsert_stmt = stmt.on_conflict_do_update(
+            index_elements=["group_id", "word"],
+            set_={
+                "action": stmt.excluded.action,
+                "normalized_word": stmt.excluded.normalized_word,
+            },
+        )
+        await session.execute(upsert_stmt)
+    else:
+        # SQLite: use INSERT OR REPLACE style via on_conflict_do_update
+        # Note: SQLite's insert() doesn't support constraint= parameter,
+        # so we use index_elements instead
+        stmt = sqlite_insert(Blacklist).values(payload)
+        upsert_stmt = stmt.on_conflict_do_update(
+            index_elements=["group_id", "word"],
+            set_={
+                "action": stmt.excluded.action,
+                "normalized_word": stmt.excluded.normalized_word,
+            },
+        )
+        await session.execute(upsert_stmt)
 
 
 def _usage_text() -> str:
