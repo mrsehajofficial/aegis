@@ -20,7 +20,6 @@ import threading
 from pathlib import Path
 from typing import Optional
 
-import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
@@ -94,11 +93,13 @@ async def serve_miniapp_asset(asset_path: str):
 # /health and /miniapp above keep winning while /api/v1/* reaches the dashboard.
 api_app.mount("/", dashboard_app)
 
-_server: Optional[uvicorn.Server] = None
+_server = None
 
 
 def run_api_server(host: Optional[str] = None, port: Optional[int] = None) -> None:
     """Blocking entry point (``python -m app.api.server``)."""
+    import uvicorn
+
     uvicorn.run(
         api_app,
         host=host or settings.API_HOST,
@@ -111,6 +112,8 @@ def start_api_server_thread(
     host: Optional[str] = None, port: Optional[int] = None
 ) -> threading.Thread:
     """Start the API on a daemon thread (single-process deployments)."""
+    import uvicorn
+
     global _server
     _server = uvicorn.Server(
         uvicorn.Config(
