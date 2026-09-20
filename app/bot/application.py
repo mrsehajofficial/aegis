@@ -19,6 +19,7 @@ from app.bot.handlers.commands import (
     info_command,
     admins_command,
 )
+from app.bot.handlers.dashboard import dashboard_command
 from app.bot.handlers.start import start_command, menu_callback
 from app.bot.handlers.moderation import (
     ban_command,
@@ -92,6 +93,7 @@ _COMMANDS = [
     BotCommand("setrules", "Set the group rules"),
     BotCommand("settings", "Group settings control panel"),
     BotCommand("stats", "Group health: members, warnings, actions"),
+    BotCommand("dashboard", "Open the Dashboard Mini App"),
     BotCommand("welcome", "Show the welcome message"),
     BotCommand("setwelcome", "Turn welcome on/off or set its text"),
     BotCommand("goodbye", "Show the goodbye message"),
@@ -176,6 +178,7 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("info", info_command))
     app.add_handler(CommandHandler("admins", admins_command))
     app.add_handler(CommandHandler("stats", stats_command))
+    app.add_handler(CommandHandler("dashboard", dashboard_command))
 
     # ── Moderation Commands ─────────────────────────────────────────────────────
     app.add_handler(CommandHandler("ban", ban_command))
