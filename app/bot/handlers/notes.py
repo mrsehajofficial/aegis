@@ -24,7 +24,7 @@ async def save_note_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     if await guard(update, context, "save") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>")
         return
     args = context.args or []
@@ -104,7 +104,7 @@ async def clear_note_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if await guard(update, context, "clear") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>")
         return
     if not context.args:

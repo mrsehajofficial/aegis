@@ -128,7 +128,7 @@ async def settings_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         return
 
     # Every remaining action mutates group configuration.
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await query.answer("Only administrators can change settings.", show_alert=True)
         return
 

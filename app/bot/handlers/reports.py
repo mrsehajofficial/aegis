@@ -42,20 +42,26 @@ async def report_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if not target_msg:
         await msg.reply_html("<b>Reply to a message to report it.</b>")
         return
-    # Dont allow reporting bot messages or own messages
-    if target_msg.from_user.is_bot:
+    # Safely handle anonymous admins / channel posts where from_user is None
+    reported_user = target_msg.from_user
+    if reported_user is None:
+        await msg.reply_html("<b>Cannot report anonymous or channel messages.</b>")
+        return
+    # Don't allow reporting bot messages
+    if reported_user.is_bot:
         await msg.reply_html("<b>Cannot report bot messages.</b>")
         return
     reporter = msg.from_user
-    reported = target_msg.from_user
     reason = " ".join(context.args) if context.args else "No reason provided"
     # Build report
+    reported_name = html.escape(reported_user.full_name)
+    reporter_name = html.escape(reporter.full_name) if reporter else "Unknown"
     report_text = (
         f"<b>Report</b>\n\n"
-        f"<b>Reported user:</b> {html.escape(reported.full_name)} (<code>{reported.id}</code>)\n"
-        f"<b>Reported by:</b> {html.escape(reporter.full_name)} (<code>{reporter.id}</code>)\n"
+        f"<b>Reported user:</b> {reported_name} (<code>{reported_user.id}</code>)\n"
+        f"<b>Reported by:</b> {reporter_name} (<code>{reporter.id if reporter else '?'}</code>)\n"
         f"<b>Reason:</b> {html.escape(reason)}\n\n"
-        f"<a href=\"tg://user?id={reported.id}\">View user</a>"
+        f'<a href="tg://user?id={reported_user.id}">View user</a>'
     )
     # Forward the reported message to each admin
     sent_count = 0
@@ -85,7 +91,7 @@ async def setreports_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if await guard(update, context, "reports") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>")
         return
     args = context.args or []

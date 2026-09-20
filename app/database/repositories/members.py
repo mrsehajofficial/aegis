@@ -59,8 +59,16 @@ class MemberRepository(BaseRepository[Member]):
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
         role: str = "member",
-        joined_at: Optional[datetime] = None
+        joined_at: Optional[datetime] = None,
+        force_role: bool = False,
     ) -> Member:
+        """Create or update a member record.
+
+        By default (``force_role=False``) the stored role is *never downgraded*:
+        if a member is already recorded as an admin/owner, tracking a new message
+        from them won't silently demote them back to "member".
+        Pass ``force_role=True`` (used by the admin-sync path) to override.
+        """
         member = await self.get_member(group_id, telegram_id)
         if member is None:
             member = Member(
@@ -80,15 +88,34 @@ class MemberRepository(BaseRepository[Member]):
                 member.first_name = first_name
             if last_name is not None:
                 member.last_name = last_name
-            member.role = role
+            # Only update the role if explicitly forced, or if the new role
+            # is a promotion (higher privilege than what is already stored).
+            _RANK = {"member": 0, "moderator": 1, "admin": 2, "owner": 3, "creator": 3}
+            stored_rank = _RANK.get(member.role, 0)
+            new_rank = _RANK.get(role, 0)
+            if force_role or new_rank > stored_rank:
+                member.role = role
 
         await self.session.flush()
         return member
 
+    async def count_admins(self, group_id: int) -> int:
+        """Count members with admin or owner/creator roles."""
+        query = (
+            select(func.count())
+            .select_from(Member)
+            .where(
+                Member.group_id == group_id,
+                Member.role.in_(["owner", "creator", "admin", "administrator"])
+            )
+        )
+        result = await self.session.execute(query)
+        return result.scalar() or 0
+
     async def list_admins(self, group_id: int) -> Sequence[Member]:
         query = select(Member).where(
             Member.group_id == group_id,
-            Member.role.in_(["owner", "admin", "creator", "administrator"])
+            Member.role.in_(["owner", "creator", "admin", "administrator"])
         )
         result = await self.session.execute(query)
         return result.scalars().all()

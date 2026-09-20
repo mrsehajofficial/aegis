@@ -131,7 +131,7 @@ async def ban_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     if await guard(update, context, "ban") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>\nThis command is restricted to administrators.")
         return
     target, reason = await _resolve_target(update, context)
@@ -161,7 +161,7 @@ async def unban_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     if await guard(update, context, "unban") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>\nThis command is restricted to administrators.")
         return
     target, _ = await _resolve_target(update, context)
@@ -182,7 +182,7 @@ async def kick_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if await guard(update, context, "kick") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>\nThis command is restricted to administrators.")
         return
     target, reason = await _resolve_target(update, context)
@@ -210,7 +210,7 @@ async def mute_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if await guard(update, context, "mute") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>\nThis command is restricted to administrators.")
         return
     target, rest = await _resolve_target(update, context)
@@ -251,7 +251,7 @@ async def unmute_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if await guard(update, context, "unmute") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>\nThis command is restricted to administrators.")
         return
     target, _ = await _resolve_target(update, context)
@@ -264,9 +264,25 @@ async def unmute_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await update.effective_message.reply_text("You cannot unmute a member with an equal or higher rank.")
         return
     try:
+        # Restore the group's default member permissions rather than granting
+        # all_permissions() (which would inadvertently give pin/manage rights).
+        chat_obj = await context.bot.get_chat(chat.id)
+        default_perms = chat_obj.permissions or ChatPermissions(
+            can_send_messages=True,
+            can_send_audios=True,
+            can_send_documents=True,
+            can_send_photos=True,
+            can_send_videos=True,
+            can_send_video_notes=True,
+            can_send_voice_notes=True,
+            can_send_polls=True,
+            can_send_other_messages=True,
+            can_add_web_page_previews=True,
+            can_invite_users=True,
+        )
         await context.bot.restrict_chat_member(
             chat.id, target.id,
-            permissions=ChatPermissions.all_permissions())
+            permissions=default_perms)
     except Exception as e:
         await update.effective_message.reply_text(f"Unmute failed. Make sure I am an administrator with restrict rights.\n({e})")
         return
@@ -278,7 +294,7 @@ async def warn_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if await guard(update, context, "warn") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>\nThis command is restricted to administrators.")
         return
     target, reason = await _resolve_target(update, context)
@@ -343,7 +359,7 @@ async def resetwarns_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if await guard(update, context, "resetwarns") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>\nThis command is restricted to administrators.")
         return
     target, _ = await _resolve_target(update, context)
@@ -363,7 +379,7 @@ async def purge_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     if await guard(update, context, "purge") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>\nThis command is restricted to administrators.")
         return
     msg = update.effective_message
@@ -372,13 +388,30 @@ async def purge_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         return
     start_id = msg.reply_to_message.message_id
     end_id = msg.message_id
+    # Safety cap: never purge more than 100 messages in one call to avoid
+    # DoS-style rate-limit storms from accidentally replying to an old message.
+    _MAX_PURGE = 100
+    total_range = end_id - start_id + 1
+    if total_range > _MAX_PURGE:
+        await msg.reply_text(
+            f"Purge range ({total_range}) exceeds the safety limit of {_MAX_PURGE} messages. "
+            "Reply to a more recent message."
+        )
+        return
+    # Build list of IDs and batch-delete (Telegram allows up to 100 at once).
+    message_ids = list(range(start_id, end_id + 1))
     deleted = 0
-    for mid in range(start_id, end_id + 1):
-        try:
-            await context.bot.delete_message(chat.id, mid)
-            deleted += 1
-        except Exception:
-            continue
+    try:
+        await context.bot.delete_messages(chat.id, message_ids)
+        deleted = len(message_ids)
+    except Exception:
+        # Fallback: delete one by one if batch fails (e.g. older PTB versions).
+        for mid in message_ids:
+            try:
+                await context.bot.delete_message(chat.id, mid)
+                deleted += 1
+            except Exception:
+                continue
     await _audit("PURGE", chat.id, update.effective_user.id, None, None, {"deleted": deleted})
     # The purge range includes the command message itself, so a plain
     # send_message is used — reply_text would fail with
@@ -396,7 +429,7 @@ async def pin_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     if await guard(update, context, "pin") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>\nThis command is restricted to administrators.")
         return
     msg = update.effective_message
@@ -419,7 +452,7 @@ async def unpin_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     if await guard(update, context, "unpin") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>\nThis command is restricted to administrators.")
         return
     try:
@@ -436,7 +469,7 @@ async def logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if await guard(update, context, "logs") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>\nThis command is restricted to administrators.")
         return
     async with get_session() as session:

@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 _TELEGRAM_API = "https://api.telegram.org"
 _ADMIN_CACHE_TTL = 300  # seconds a getChatMember answer is trusted
+_ADMIN_CACHE_MAX = 2000  # maximum entries before LRU-style eviction
 _admin_cache: Dict[tuple, tuple] = {}
 
 BOT_TOKEN: Optional[str] = None
@@ -105,7 +106,9 @@ def verify_init_data(init_data: str, max_age: Optional[int] = None) -> Dict[str,
 
     window = settings.MINIAPP_AUTH_MAX_AGE if max_age is None else max_age
     auth_date = _to_int(fields.get("auth_date"))
-    if window and auth_date and (time.time() - auth_date) > window:
+    if auth_date is None:
+        raise AuthError(401, "initData is missing auth_date")
+    if window and (time.time() - auth_date) > window:
         raise AuthError(401, "initData has expired - reopen the dashboard")
 
     user = _load_json(fields.get("user"))
@@ -167,6 +170,13 @@ async def is_chat_admin(chat_id: int, user_id: Optional[int]) -> bool:
 
     status = (payload.get("result") or {}).get("status", "")
     allowed = status in ("creator", "administrator")
+    # Evict oldest entries when cache grows too large (simple FIFO eviction).
+    if len(_admin_cache) >= _ADMIN_CACHE_MAX:
+        try:
+            oldest_key = next(iter(_admin_cache))
+            del _admin_cache[oldest_key]
+        except StopIteration:
+            pass
     _admin_cache[key] = (now + _ADMIN_CACHE_TTL, allowed)
     return allowed
 

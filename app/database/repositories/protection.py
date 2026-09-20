@@ -116,6 +116,17 @@ class NoteRepository(BaseRepository[Note]):
             return True
         return False
 
+    async def remove_note_by_id(self, note_id: int) -> Optional[Note]:
+        """Delete a note by its primary key, returning the deleted object or None."""
+        from app.database.models.protection import Note
+        query = select(Note).where(Note.id == note_id)
+        result = await self.session.execute(query)
+        note = result.scalar_one_or_none()
+        if note:
+            await self.session.delete(note)
+            await self.session.flush()
+        return note
+
     async def clear_group(self, group_id: int) -> int:
         from sqlalchemy import delete
         from app.database.models.protection import Note

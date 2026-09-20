@@ -240,13 +240,20 @@ def build_application() -> Application:
     )
 
     # ── Message Handlers (non-command text) ──────────────────────────────────
-    # Filter auto-replies
+    # Filter auto-replies (text only — filters are keyword triggers)
     app.add_handler(MessageHandler(ptb_filters.TEXT & ~ptb_filters.COMMAND, check_filters))
     # Notes (#keyword auto-detection)
     app.add_handler(MessageHandler(ptb_filters.TEXT & ~ptb_filters.COMMAND, check_notes_in_message, block=False), group=3)
-    # Protection: flood/spam/blacklist (group 2, block=False)
+    # Protection: flood/spam/blacklist — covers ALL user content messages,
+    # not just text.  Stickers, photos, videos, voice notes can also be used
+    # to flood, so we must not exclude them.
     app.add_handler(
-        MessageHandler(ptb_filters.TEXT & ~ptb_filters.COMMAND, check_protection, block=False), group=2
+        MessageHandler(
+            ~ptb_filters.COMMAND & ~ptb_filters.StatusUpdate.ALL,
+            check_protection,
+            block=False,
+        ),
+        group=2,
     )
 
     # ── Member tracking (username cache for @user resolution) ─────────────────

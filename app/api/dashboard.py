@@ -103,7 +103,7 @@ async def list_filters(telegram_id: int):
         return [{"id": f.id, "trigger": f.trigger, "response": f.response, "enabled": f.enabled} for f in items]
 
 
-@app.post("/api/v1/groups/{telegram_id}/filters")
+@app.post("/api/v1/groups/{telegram_id}/filters", status_code=201)
 async def create_filter(telegram_id: int, data: FilterCreate):
     group = await _get_group(telegram_id)
     if not group:
@@ -111,7 +111,7 @@ async def create_filter(telegram_id: int, data: FilterCreate):
     async with get_session() as session:
         f = await FilterRepository(session).create(group.id, data.trigger.lower().strip(), data.response, data.enabled)
         await session.commit()
-        return {"id": f.id, "trigger": f.trigger, "response": f.response, "enabled": f.enabled}, 201
+        return {"id": f.id, "trigger": f.trigger, "response": f.response, "enabled": f.enabled}
 
 
 @app.delete("/api/v1/groups/{telegram_id}/filters/{filter_id}")
@@ -120,10 +120,11 @@ async def delete_filter(telegram_id: int, filter_id: int):
     if not group:
         raise HTTPException(404, "Group not found")
     async with get_session() as session:
-        f = await FilterRepository(session).get_by_id(filter_id)
+        repo = FilterRepository(session)
+        f = await repo.get_by_id(filter_id)
         if not f or f.group_id != group.id:
             raise HTTPException(404, "Filter not found")
-        await FilterRepository(session).delete_by_id(filter_id)
+        await repo.delete_by_id(filter_id)
         await session.commit()
         return {"success": True}
 
@@ -138,7 +139,7 @@ async def list_blacklist(telegram_id: int):
         return [{"id": w.id, "word": w.word, "action": w.action} for w in items]
 
 
-@app.post("/api/v1/groups/{telegram_id}/blacklist")
+@app.post("/api/v1/groups/{telegram_id}/blacklist", status_code=201)
 async def add_blacklist(telegram_id: int, data: BlacklistCreate):
     group = await _get_group(telegram_id)
     if not group:
@@ -146,7 +147,7 @@ async def add_blacklist(telegram_id: int, data: BlacklistCreate):
     async with get_session() as session:
         w = await BlacklistRepository(session).add_word(group.id, data.word, data.action)
         await session.commit()
-        return {"id": w.id, "word": w.word, "action": w.action}, 201
+        return {"id": w.id, "word": w.word, "action": w.action}
 
 
 @app.delete("/api/v1/groups/{telegram_id}/blacklist/{word_id}")
@@ -176,7 +177,7 @@ async def list_notes(telegram_id: int):
         return [{"id": n.id, "keyword": n.keyword, "content": n.content} for n in items]
 
 
-@app.post("/api/v1/groups/{telegram_id}/notes")
+@app.post("/api/v1/groups/{telegram_id}/notes", status_code=201)
 async def upsert_note(telegram_id: int, data: NoteCreate):
     group = await _get_group(telegram_id)
     if not group:
@@ -184,7 +185,7 @@ async def upsert_note(telegram_id: int, data: NoteCreate):
     async with get_session() as session:
         n = await NoteRepository(session).save_note(group.id, data.keyword, data.content)
         await session.commit()
-        return {"id": n.id, "keyword": n.keyword, "content": n.content}, 201
+        return {"id": n.id, "keyword": n.keyword, "content": n.content}
 
 
 @app.delete("/api/v1/groups/{telegram_id}/notes/{note_id}")

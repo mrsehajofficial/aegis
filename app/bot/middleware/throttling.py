@@ -18,6 +18,18 @@ _rate_store: Dict[Tuple[int, str], Tuple[int, float]] = defaultdict(lambda: (0, 
 DEFAULT_MAX = 5
 DEFAULT_WINDOW = 30.0
 
+# Cleanup threshold: purge expired keys when store grows beyond this size.
+_CLEANUP_THRESHOLD = 2000
+
+
+def _maybe_cleanup(now: float) -> None:
+    """Remove entries whose windows have expired (runs infrequently)."""
+    if len(_rate_store) < _CLEANUP_THRESHOLD:
+        return
+    stale = [k for k, (_, ws) in list(_rate_store.items()) if now - ws > DEFAULT_WINDOW * 2]
+    for k in stale:
+        _rate_store.pop(k, None)
+
 
 def check_rate_limit(
     user_id: int,
@@ -31,6 +43,7 @@ def check_rate_limit(
     """
     key = (user_id, command)
     now = time.monotonic()
+    _maybe_cleanup(now)
     count, window_start = _rate_store[key]
 
     if now - window_start > window_seconds:

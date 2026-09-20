@@ -1,3 +1,4 @@
+import html
 import logging
 import time
 from typing import Optional
@@ -170,7 +171,7 @@ async def info_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if target_user.last_name:
         full_name += f" {target_user.last_name}"
 
-    mention = f'<a href="tg://user?id={target_user.id}">{full_name}</a>'
+    mention = f'<a href="tg://user?id={target_user.id}">{html.escape(full_name)}</a>'
 
     lines = [
         "<b>User Information</b>\n",
@@ -227,10 +228,10 @@ async def admins_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         full_name = user.first_name
         if user.last_name:
             full_name += f" {user.last_name}"
-        mention = f'<a href="tg://user?id={user.id}">{full_name}</a>'
-        role_label = "Owner" if admin.status.value == "owner" else "Admin"
+        mention = f'<a href="tg://user?id={user.id}">{html.escape(full_name)}</a>'
+        role_label = "Owner" if admin.status.value in ("creator", "owner") else "Admin"
         if user.username:
-            lines.append(f"• <b>{role_label}</b>: {mention} (@{user.username})")
+            lines.append(f"• <b>{role_label}</b>: {mention} (@{html.escape(user.username)})")
         else:
             lines.append(f"• <b>{role_label}</b>: {mention}")
 

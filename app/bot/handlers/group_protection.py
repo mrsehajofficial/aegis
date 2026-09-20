@@ -37,14 +37,15 @@ LOCK_TYPES = {
 }
 
 LOCK_PERMISSIONS = {
-    "media": ["can_send_media_messages"],
+    "media": ["can_send_photos", "can_send_videos", "can_send_audios",
+              "can_send_documents", "can_send_video_notes", "can_send_voice_notes"],
     "sticker": ["can_send_other_messages"],
     "gif": ["can_send_other_messages"],
-    "photo": ["can_send_media_messages"],
-    "video": ["can_send_media_messages"],
-    "audio": ["can_send_media_messages"],
-    "document": ["can_send_media_messages"],
-    "poll": ["can_send_other_messages"],
+    "photo": ["can_send_photos"],
+    "video": ["can_send_videos"],
+    "audio": ["can_send_audios", "can_send_voice_notes"],
+    "document": ["can_send_documents"],
+    "poll": ["can_send_polls"],
     "game": ["can_send_other_messages"],
     "url": ["can_add_web_page_previews"],
 }
@@ -54,7 +55,7 @@ async def setantiflood_command(update: Update, context: ContextTypes.DEFAULT_TYP
     if await guard(update, context, "setantiflood") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>")
         return
     args = context.args or []
@@ -88,7 +89,7 @@ async def setantispam_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     if await guard(update, context, "setantispam") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>")
         return
     args = context.args or []
@@ -126,7 +127,7 @@ async def lock_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if await guard(update, context, "lock") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>")
         return
     if not context.args:
@@ -156,7 +157,7 @@ async def unlock_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if await guard(update, context, "unlock") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>")
         return
     if not context.args:
@@ -167,8 +168,28 @@ async def unlock_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await update.effective_message.reply_text(f"Unknown: {lock_type}")
         return
     try:
-        perms = ChatPermissions.all_permissions()
-        await context.bot.set_chat_permissions(chat.id, perms)
+        # Fetch current chat permissions and re-enable only the unlocked field(s),
+        # preserving everything else. Using all_permissions() would inadvertently
+        # grant pin/info rights to regular members.
+        chat_obj = await context.bot.get_chat(chat.id)
+        current = chat_obj.permissions or ChatPermissions()
+        for perm_attr in LOCK_PERMISSIONS.get(lock_type, []):
+            setattr(current, perm_attr, True)
+        if lock_type == "all":
+            current = ChatPermissions(
+                can_send_messages=True,
+                can_send_audios=True,
+                can_send_documents=True,
+                can_send_photos=True,
+                can_send_videos=True,
+                can_send_video_notes=True,
+                can_send_voice_notes=True,
+                can_send_polls=True,
+                can_send_other_messages=True,
+                can_add_web_page_previews=True,
+                can_invite_users=True,
+            )
+        await context.bot.set_chat_permissions(chat.id, current)
         await update.effective_message.reply_html(f"<b>Unlocked:</b> {LOCK_TYPES[lock_type]}")
     except Exception as e:
         await update.effective_message.reply_text(f"Unlock failed: {e}")
@@ -186,7 +207,7 @@ async def locktypes_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def addblacklist_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await guard(update, context, "addblacklist") is None:
         return
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>")
         return
     args = context.args or []
@@ -226,7 +247,7 @@ async def blacklist_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def rmblacklist_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await guard(update, context, "rmblacklist") is None:
         return
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>")
         return
     if not context.args:
@@ -298,7 +319,20 @@ async def check_protection(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def _handle_blacklist_word(message, context: ContextTypes.DEFAULT_TYPE, word: str, action: str) -> None:
     await message.delete()
     user_id = message.from_user.id
-    if action == "mute":
+    if action == "warn":
+        from app.moderation.warning_service import issue_warning
+        try:
+            chat = message.chat
+            # We have no actor for automated blacklist warns — use a sentinel.
+            class _FakeUser:
+                id = context.bot.id
+                first_name = "Aegis"
+                last_name = ""
+                username = None
+            await issue_warning(chat, _FakeUser(), message.from_user, f"Blacklisted word: {word}")
+        except Exception as e:
+            logger.debug(f"Blacklist warn failed for {user_id}: {e}")
+    elif action == "mute":
         from datetime import timedelta
         from app.anti_spam.actions import mute_user
         await mute_user(context, message.chat.id, user_id, timedelta(minutes=10))

@@ -474,7 +474,7 @@ async def importfromrose_command(update: Update, context: ContextTypes.DEFAULT_T
         return
     chat = update.effective_chat
     msg = update.effective_message
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await msg.reply_html("<b>Access denied.</b>\nThis command is restricted to administrators.")
         return
 

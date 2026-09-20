@@ -41,8 +41,15 @@ def get_engine() -> AsyncEngine:
             "echo": settings.LOG_LEVEL.upper() == "DEBUG",
         }
         if "sqlite" in db_url:
-            # SQLite concurrency settings
-            engine_args["connect_args"] = {"check_same_thread": False}
+            # WAL mode allows one writer + many readers concurrently; busy_timeout
+            # prevents "database is locked" when the bot and API share the same file.
+            engine_args["connect_args"] = {
+                "check_same_thread": False,
+                "timeout": 30,
+            }
+            engine_args["execution_options"] = {
+                "isolation_level": "AUTOCOMMIT",
+            }
         else:
             engine_args["pool_pre_ping"] = True
             engine_args["pool_size"] = 10
@@ -120,6 +127,13 @@ async def init_db() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         await _ensure_settings_columns(conn)
+        # Enable WAL mode for SQLite: allows concurrent reads while writing,
+        # and avoids "database is locked" when the bot and API run together.
+        db_url = get_async_database_url(settings.DATABASE_URL)
+        if "sqlite" in db_url:
+            await conn.execute(text("PRAGMA journal_mode=WAL"))
+            await conn.execute(text("PRAGMA busy_timeout=30000"))
+            await conn.execute(text("PRAGMA synchronous=NORMAL"))
 
 
 async def close_db() -> None:

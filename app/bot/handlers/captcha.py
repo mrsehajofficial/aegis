@@ -277,7 +277,7 @@ async def _expire_later(
     except Exception as e:
         logger.warning(f"Captcha enforcement failed for {user_id} in {chat_id}: {e}")
     try:
-        await context.bot.unrestrict_chat_member(
+        await context.bot.restrict_chat_member(
             chat_id, user_id, permissions=FULL_PERMISSIONS
         )
     except Exception:
@@ -325,7 +325,7 @@ async def verify_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         task.cancel()
 
     try:
-        await context.bot.unrestrict_chat_member(
+        await context.bot.restrict_chat_member(
             chat_id=chat.id, user_id=user.id, permissions=FULL_PERMISSIONS
         )
     except Exception as e:
@@ -369,7 +369,7 @@ async def setcaptcha_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if await guard(update, context, "setcaptcha") is None:
         return
     chat = update.effective_chat
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>")
         return
 

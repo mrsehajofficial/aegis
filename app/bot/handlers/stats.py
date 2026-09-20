@@ -8,6 +8,7 @@ this data all along and Rose gives admins no way to see any of it.
 `build_stats_text` is a pure function over a plain dict so the formatting is
 unit-testable without a database.
 """
+import html
 import logging
 import time
 from typing import Optional
@@ -61,7 +62,7 @@ def uptime_seconds() -> float:
 def build_stats_text(snapshot: dict) -> str:
     """Render the /stats panel body from pre-fetched values."""
     lines = [
-        f"<b>Group Stats — {snapshot['title']}</b>",
+        f"<b>Group Stats — {html.escape(snapshot['title'])}</b>",
         "",
         f"👥 Tracked members: <b>{snapshot['members']}</b>",
         f"🛡 Admins/owner: <b>{snapshot['admins']}</b>",
@@ -98,7 +99,7 @@ async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         audit_repo = AuditLogRepository(session)
 
         members = await member_repo.count_members(g.id)
-        admins = await member_repo.count_role(g.id, "admin")
+        admins = await member_repo.count_admins(g.id)
         total_warnings, warned_users = await warning_repo.count_for_group(g.id)
         total_actions = await audit_repo.count_for_group(g.id)
         top_actions = await audit_repo.action_counts(g.id)

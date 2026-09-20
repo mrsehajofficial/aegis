@@ -23,7 +23,7 @@ async def dashboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     chat = update.effective_chat
     user = update.effective_user
     
-    if not await is_admin_or_above(update):
+    if not await is_admin_or_above(update, context):
         await update.effective_message.reply_html("<b>Access denied.</b>")
         return
     
