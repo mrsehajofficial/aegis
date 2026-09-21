@@ -48,19 +48,25 @@ _bot_started = threading.Event()
 
 
 def _run_bot() -> None:
-    """Run the bot's event loop to completion (it blocks until killed)."""
-    try:
-        from app.main import run_bot
+    """Run the bot's event loop with auto-restart on unexpected crashes."""
+    import time
 
-        asyncio.run(run_bot())
-    except SystemExit:
-        pass  # run_bot exits(2) on a missing/placeholder BOT_TOKEN
-    except Exception:
-        import logging
+    while True:
+        try:
+            from app.main import run_bot
 
-        logging.getLogger("aegis.wsgi").critical(
-            "Aegis bot thread crashed:\n%s", traceback.format_exc()
-        )
+            asyncio.run(run_bot())
+            break
+        except SystemExit:
+            break  # run_bot exits(2) on a missing/placeholder BOT_TOKEN
+        except Exception:
+            import logging
+
+            logging.getLogger("aegis.wsgi").warning(
+                "Aegis bot thread encountered an error, restarting in 5s:\n%s",
+                traceback.format_exc(),
+            )
+            time.sleep(5)
 
 
 def start_aegis_once() -> None:

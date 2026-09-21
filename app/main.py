@@ -26,8 +26,10 @@ from telegram.ext import (
     filters as ptb_filters,
 )
 from telegram.request import HTTPXRequest
+import telegram.error
 
 from app.config.settings import settings
+
 from app.bot.application import build_application
 from app.bot.health import HealthServer
 from app.anti_spam.flood import close_flood_store, init_flood_store
@@ -57,7 +59,7 @@ async def _start_delivery(app: Application) -> str:
     ("webhook" or "polling") so the health endpoint can report it.
     """
     if not settings.WEBHOOK_URL:
-        await app.updater.start_polling()
+        await app.updater.start_polling(bootstrap_retries=5)
         logger.info("Delivery mode: long polling.")
         return "polling"
 
@@ -126,14 +128,40 @@ async def run_bot() -> None:
     rep_store = await init_reputation_store()
     logger.info(f"Reputation store backend: {rep_store.name}")
 
-    logger.info("Building application...")
-    app: Application = build_application()
+    app: Application | None = None
+    mode: str = "polling"
+    max_retries = 5
+    for attempt in range(1, max_retries + 1):
+        try:
+            logger.info("Building application...")
+            app = build_application()
 
-    logger.info(f"Starting bot (token={'***' + settings.BOT_TOKEN[-4:]})...")
-    await app.initialize()
-    await app.start()
-
-    mode = await _start_delivery(app)
+            logger.info(
+                f"Starting bot (token={'***' + settings.BOT_TOKEN[-4:]}"
+                f"{f', attempt {attempt}/{max_retries}' if attempt > 1 else ''})..."
+            )
+            await app.initialize()
+            await app.start()
+            mode = await _start_delivery(app)
+            break
+        except (telegram.error.NetworkError, telegram.error.TimedOut) as exc:
+            if attempt == max_retries:
+                logger.critical(
+                    f"Fatal error: failed to initialize Telegram bot after {max_retries} attempts: {exc}"
+                )
+                raise
+            delay = 2 * attempt
+            logger.warning(
+                f"Transient network/proxy error during bot startup ({exc.__class__.__name__}: {exc}). "
+                f"Retrying in {delay}s (attempt {attempt}/{max_retries})..."
+            )
+            try:
+                if app:
+                    await app.shutdown()
+            except Exception:
+                pass
+            app = None
+            await asyncio.sleep(delay)
 
     health: HealthServer | None = None
     if settings.HEALTH_PORT:
@@ -159,9 +187,11 @@ async def run_bot() -> None:
         logger.info("Stopping bot...")
         if health is not None:
             await health.stop()
-        await app.updater.stop()
-        await app.stop()
-        await app.shutdown()
+        if app is not None and app.updater and app.updater.running:
+            await app.updater.stop()
+        if app is not None:
+            await app.stop()
+            await app.shutdown()
         await close_flood_store()
         await close_reputation_store()
         await close_db()

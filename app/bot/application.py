@@ -174,7 +174,8 @@ def _get_proxy_url() -> str | None:
         or os.environ.get("PYTHONANYWHERE_SITE")
         or "pythonanywhere" in sys.executable.lower()
         or "pythonanywhere" in os.environ.get("VIRTUAL_ENV", "").lower()
-        or os.path.isdir("/var/www")
+        or "pythonanywhere" in os.path.expanduser("~").lower()
+        or os.path.exists("/var/www/aegistelebot_pythonanywhere_com_wsgi.py")
     )
     if is_pa:
         return (
