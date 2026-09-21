@@ -4,13 +4,6 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-# Clear proxy environment variables early so httpx (used by python-telegram-bot
-# internally) never auto-detects a proxy from HTTP_PROXY / HTTPS_PROXY etc.
-# On some hosts (notably PythonAnywhere) these may be set system-wide and point
-# at a dead proxy, causing every Telegram API call to fail with ProxyError.
-for _var in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy",
-             "ALL_PROXY", "all_proxy", "no_proxy", "NO_PROXY"):
-    os.environ.pop(_var, None)
 
 
 class Settings(BaseSettings):

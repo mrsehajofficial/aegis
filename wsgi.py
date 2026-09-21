@@ -24,14 +24,6 @@ import threading
 import traceback
 from pathlib import Path
 
-# Clear proxy environment variables before any httpx import.  python-telegram-bot
-# uses httpx internally and auto-detects proxies from HTTP_PROXY / HTTPS_PROXY /
-# ALL_PROXY etc.  On some hosts (notably PythonAnywhere) these may be set system-
-# wide and point at a dead proxy, causing every Telegram API call to fail with
-# ProxyError: 503 and crashing the bot polling loop.
-for _var in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy",
-             "ALL_PROXY", "all_proxy", "no_proxy", "NO_PROXY"):
-    os.environ.pop(_var, None)
 
 # On PythonAnywhere the WSGI file lives in /var/www/ (not the project), so the
 # project path is hardcoded there; fall back to this file's location locally.

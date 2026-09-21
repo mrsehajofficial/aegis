@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 from telegram import BotCommand, BotCommandScopeAllGroupChats
 from telegram.ext import (
@@ -158,22 +159,38 @@ async def _post_init(application: Application) -> None:
     mark_started()
 
 
-def _make_request() -> HTTPXRequest:
-    """Build the bot's HTTP request backend with proxy auto-detection disabled.
+def _get_proxy_url() -> str | None:
+    """Resolve the proxy URL, auto-detecting PythonAnywhere if applicable.
 
-    python-telegram-bot uses httpx internally for all Telegram API calls.  httpx
-    auto-detects proxies from HTTP_PROXY / HTTPS_PROXY / ALL_PROXY environment
-    variables.  On some hosts (notably PythonAnywhere) these may be set
-    system-wide and point at a dead or captive proxy, causing every API call to
-    fail with ``httpx.ProxyError: 503 Service Unavailable`` and crashing the
-    bot polling loop.
-
-    The fix: configure HTTPXRequest. If ``settings.HTTP_PROXY_URL`` is set,
-    route through that proxy. Otherwise, disable environment proxy detection
-    via trust_env=False so broken environment proxies are ignored.
+    PythonAnywhere free accounts require routing all outbound HTTP/HTTPS requests
+    through http://proxy.server:3128; direct connections are blocked by their firewall.
     """
-    raw_proxy = (settings.HTTP_PROXY_URL or "").strip()
-    proxy = raw_proxy if raw_proxy else None
+    if settings.HTTP_PROXY_URL and settings.HTTP_PROXY_URL.strip():
+        return settings.HTTP_PROXY_URL.strip()
+
+    # Detect PythonAnywhere environment where proxy is mandatory
+    is_pa = bool(
+        os.environ.get("PYTHONANYWHERE_DOMAIN")
+        or os.environ.get("PYTHONANYWHERE_SITE")
+        or "pythonanywhere" in sys.executable.lower()
+        or "pythonanywhere" in os.environ.get("VIRTUAL_ENV", "").lower()
+        or os.path.isdir("/var/www")
+    )
+    if is_pa:
+        return (
+            os.environ.get("https_proxy")
+            or os.environ.get("http_proxy")
+            or "http://proxy.server:3128"
+        )
+
+    # Standard environment proxy fallback
+    env_proxy = (os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY") or "").strip()
+    return env_proxy if env_proxy else None
+
+
+def _make_request() -> HTTPXRequest:
+    """Build the bot's HTTP request backend."""
+    proxy = _get_proxy_url()
     httpx_kwargs = {}
     if not proxy:
         httpx_kwargs["trust_env"] = False
@@ -185,7 +202,7 @@ def _make_request() -> HTTPXRequest:
         write_timeout=settings.HTTP_WRITE_TIMEOUT,
         pool_timeout=10.0,
         proxy=proxy,
-        httpx_kwargs=httpx_kwargs,
+        httpx_kwargs=httpx_kwargs if httpx_kwargs else None,
     )
 
 
