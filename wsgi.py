@@ -8,17 +8,30 @@ How it works:
 1. When PythonAnywhere imports this file, the Telegram Bot starts in a background
    daemon thread with its own asyncio event loop (handling polling/updates).
 2. The WSGI `application` callable dispatches web requests to the FastAPI app:
-   - GET /miniapp          -> serves the Mini App Dashboard UI
-   - GET /miniapp/<assets> -> serves static css/js
-   - GET /health           -> status check
+   - GET /                  -> landing page (landing/dist/index.html) or status page
+   - GET /miniapp           -> Mini App Dashboard UI
+   - GET /miniapp/<assets> -> Mini App static css/js
+   - GET /assets/<assets>  -> landing page static assets
+   - GET /health            -> status check
    - /api/v1/...           -> dashboard API calls
-   - /                     -> friendly status page
 """
+
 import asyncio
+import mimetypes
 import os
 import sys
 import threading
 import traceback
+from pathlib import Path
+
+# Clear proxy environment variables before any httpx import.  python-telegram-bot
+# uses httpx internally and auto-detects proxies from HTTP_PROXY / HTTPS_PROXY /
+# ALL_PROXY etc.  On some hosts (notably PythonAnywhere) these may be set system-
+# wide and point at a dead proxy, causing every Telegram API call to fail with
+# ProxyError: 503 and crashing the bot polling loop.
+for _var in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy",
+             "ALL_PROXY", "all_proxy", "no_proxy", "NO_PROXY"):
+    os.environ.pop(_var, None)
 
 # On PythonAnywhere the WSGI file lives in /var/www/ (not the project), so the
 # project path is hardcoded there; fall back to this file's location locally.
@@ -32,6 +45,11 @@ if PROJECT_DIR not in sys.path:
 
 # Settings loads .env relative to the CWD, so make sure we're in the project.
 os.chdir(PROJECT_DIR)
+
+# ── Paths ──────────────────────────────────────────────────────────────────────
+LANDING_DIR = Path(PROJECT_DIR) / "landing" / "dist"
+_LANDING_INDEX = LANDING_DIR / "index.html"
+_WELL_KNOWN_DIR = LANDING_DIR / ".well-known"
 
 # Guards against starting the bot twice within one WSGI process.
 _bot_started = threading.Event()
@@ -62,28 +80,80 @@ def start_aegis_once() -> None:
 
 
 # ── WSGI Adapter for FastAPI Mini App Server ──────────────────────────────────
+# ── WSGI Adapter ──────────────────────────────────────────────────────────────
+# Proxy all requests to the API server's FastAPI app (which handles /health,
+# /miniapp, /api/v1, and landing page routes), except for / which we serve
+# as the landing page directly for faster response.
 def _create_wsgi_app():
     """Wrap the FastAPI application in a pure-Python WSGI adapter."""
     from app.api.server import api_app
 
     def wsgi_handler(environ, start_response):
         path = environ.get("PATH_INFO", "/")
-        if not path or path == "/":
+        # Serve the landing page directly at / for fast response
+        if path == "/" and _LANDING_INDEX.exists():
             start_aegis_once()
-            body = (
-                b"Aegis Telegram Bot & Mini App are running.\n\n"
-                b"- Dashboard: /miniapp\n"
-                b"- Health:    /health\n"
-            )
-            start_response(
-                "200 OK",
-                [
-                    ("Content-Type", "text/plain; charset=utf-8"),
-                    ("Content-Length", str(len(body))),
-                ],
-            )
-            return [body]
+            try:
+                landing_body = _LANDING_INDEX.read_bytes()
+                landing_mime, _ = mimetypes.guess_type(str(_LANDING_INDEX))
+                start_response(
+                    "200 OK",
+                    [
+                        ("Content-Type", landing_mime or "text/html; charset=utf-8"),
+                        ("Content-Length", str(len(landing_body))),
+                    ],
+                )
+                return [landing_body]
+            except Exception:
+                body = (
+                    b"Aegis Telegram Bot & Mini App are running.\n\n"
+                    b"- Dashboard: /miniapp\n"
+                    b"- Health:    /health\n"
+                )
+                start_response(
+                    "200 OK",
+                    [
+                        ("Content-Type", "text/plain; charset=utf-8"),
+                        ("Content-Length", str(len(body))),
+                    ],
+                )
+                return [body]
 
+        # Handle .well-known/ statically
+        if path.startswith("/.well-known/"):
+            asset = path[len("/.well-known/"):]
+            target = (_WELL_KNOWN_DIR / asset).resolve()
+            if _WELL_KNOWN_DIR.resolve() in target.parents and target.is_file():
+                media_type, _ = mimetypes.guess_type(str(target))
+                start_response(
+                    "200 OK",
+                    [
+                        ("Content-Type", media_type or "application/octet-stream"),
+                        ("Content-Length", str(target.stat().st_size)),
+                    ],
+                )
+                return [target.read_bytes()]
+            start_response("404 Not Found", [("Content-Type", "text/plain")])
+            return [b"Not found"]
+
+        # Handle favicon.ico
+        if path == "/favicon.ico":
+            target = LANDING_DIR / "favicon.ico"
+            if target.is_file():
+                start_response(
+                    "200 OK",
+                    [
+                        ("Content-Type", "image/x-icon"),
+                        ("Content-Length", str(target.stat().st_size)),
+                    ],
+                )
+                return [target.read_bytes()]
+            start_response("404 Not Found", [("Content-Type", "text/plain")])
+            return [b"Not found"]
+
+        # Everything else goes to the API server's FastAPI app via ASGI bridge.
+        # FastAPI is an ASGI app (scope, receive, send), not WSGI (environ, start_response).
+        # We construct the ASGI scope from the WSGI environ and run it in a one-shot event loop.
         query_string = environ.get("QUERY_STRING", "").encode("latin-1")
         method = environ.get("REQUEST_METHOD", "GET")
         headers = []
@@ -145,6 +215,8 @@ def _create_wsgi_app():
 
     return wsgi_handler
 
+
+_app_callable = _create_wsgi_app()
 
 _app_callable = _create_wsgi_app()
 

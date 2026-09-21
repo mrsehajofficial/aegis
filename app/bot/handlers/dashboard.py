@@ -5,22 +5,25 @@ import logging
 from telegram import Chat, Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import ContextTypes
 
-from app.bot.helpers.ensure_group import ensure_group_registered
 from app.bot.middleware.auth import is_admin_or_above
 from app.config.settings import settings
 
 logger = logging.getLogger(__name__)
 
-DASHBOARD_URL = "https://your-domain.com/miniapp"
+DASHBOARD_URL = "https://aegistelebot.pythonanywhere.com/miniapp"
 
 
 async def dashboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Open the Aegis Dashboard Mini App.
 
     Works in both private chats (the Mini App lets you pick a group) and in
-    groups (only admins can open it for that group).  The button uses the
-    `web_app` field so Telegram opens it as a proper Mini App with the
-    Web Apps JS bridge rather than a plain browser link.
+    groups (only admins can open it).  The button uses the ``web_app`` field
+    so Telegram opens it as a proper Mini App rather than a plain browser link.
+
+    NOTE: We deliberately do NOT call ``guard()`` here because the dashboard
+    must be reachable from private chats (that is how Telegram Mini App buttons
+    work — tapped from the private chat with the bot).  In groups we still
+    verify admin status.
     """
     chat = update.effective_chat
     user = update.effective_user
@@ -28,19 +31,13 @@ async def dashboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     if chat is None or message is None or user is None:
         return
 
-    # In groups the caller must be an admin (and the group must be registered).
-    # In private chats anyone can open the Mini App — the API authorizes the
-    # caller via the signed initData payload, not via this command.
+    # In groups the caller must be an admin.  In private chats anyone can open
+    # the Mini App — the API authorizes the caller via the signed initData
+    # payload, not via this command.
     if chat.type in (Chat.GROUP, Chat.SUPERGROUP):
-        db_id = await ensure_group_registered(chat, context.bot)
-        if db_id is None:
-            await message.reply_text(
-                "Group registration failed. Please try again shortly."
-            )
-            return
         if not await is_admin_or_above(update, context):
             await message.reply_html(
-                "<b>Access denied.</b>\nOnly group administrators can open the "
+                "<b>Access denied.</b>\\nOnly group administrators can open the "
                 "dashboard from a group. Open a private chat with me and use /dashboard instead."
             )
             return

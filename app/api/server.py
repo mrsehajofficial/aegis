@@ -12,6 +12,8 @@ Can run in two very different shapes:
 Routes:
     GET  /health        liveness probe (no auth)
     GET  /miniapp       the dashboard page
+    GET  /              landing page (landing/dist/index.html, if it exists)
+    GET  /assets/...    landing page static assets (if landing/dist/ exists)
     *    /api/v1/...    dashboard API (initData + group-admin auth required)
 """
 import logging
@@ -36,7 +38,14 @@ MINIAPP_DIR = Path(__file__).resolve().parent.parent / "miniapp"
 _MINAPP_INDEX = MINIAPP_DIR / "index.html"
 _API_BASE_PLACEHOLDER = "__AEGIS_API_BASE__"
 
+# Landing page (marketing site) lives in landing/dist/.  Serve it at / and its
+# assets at /assets/ so the root domain shows the product site, not a blank page.
+LANDING_DIR = Path(__file__).resolve().parent.parent / "landing" / "dist"
+_LANDING_INDEX = LANDING_DIR / "index.html"
+
+
 api_app = FastAPI(title="Aegis API Server", version="1.0.0")
+
 
 # Only needed when the page and the API are on different origins.
 if settings.API_CORS_ORIGINS:
@@ -89,8 +98,42 @@ async def serve_miniapp_asset(asset_path: str):
     return FileResponse(target, media_type=media_type)
 
 
+# ── Landing page routes (must be registered BEFORE the dashboard mount) ───────
+# Starlette matches routes in registration order, so these must be defined
+# before ``api_app.mount("/", dashboard_app)`` below, otherwise the mount's
+# sub-app would intercept requests to ``/`` and ``/assets/...`` first.
+if _LANDING_INDEX.exists():
+    @api_app.get("/")
+    async def serve_landing() -> HTMLResponse:
+        """Serve the landing page (landing/dist/index.html) at the root path."""
+        try:
+            return HTMLResponse(_LANDING_INDEX.read_text(encoding="utf-8"))
+        except Exception as e:
+            logger.warning(f"Could not read landing page: {e}")
+            return HTMLResponse(
+                "<h1>Landing page unavailable</h1><p>Please try again later.</p>",
+                status_code=503,
+            )
+
+    @api_app.get("/assets/{asset_path:path}")
+    async def serve_landing_asset(asset_path: str) -> FileResponse | HTMLResponse:
+        """Serve static assets from landing/dist/ (css/js/images/fonts/icons)."""
+        if not asset_path or asset_path == "favicon.ico":
+            return HTMLResponse("Not found", status_code=404)
+        target = (LANDING_DIR / asset_path).resolve()
+        # Prevent path-traversal escapes outside landing/dist/
+        if LANDING_DIR.resolve() not in target.parents and target != LANDING_DIR.resolve():
+            return HTMLResponse("Not found", status_code=404)
+        if not target.is_file():
+            return HTMLResponse("Not found", status_code=404)
+        media_type = mimetypes.guess_type(str(target))[0] or "application/octet-stream"
+        return FileResponse(target, media_type=media_type)
+
 # Mounted last on purpose: Starlette matches routes in registration order, so
-# /health and /miniapp above keep winning while /api/v1/* reaches the dashboard.
+# /health, /miniapp, /assets/* and / above keep winning while /api/v1/* reaches
+# the dashboard.  The root path ``/`` serves the landing page from
+# ``landing/dist/index.html`` when it exists; otherwise the dashboard app's own
+# routes handle it.
 api_app.mount("/", dashboard_app)
 
 _server = None

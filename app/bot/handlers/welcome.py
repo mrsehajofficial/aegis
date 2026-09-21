@@ -285,7 +285,8 @@ async def handle_chat_member(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     old_status = (cmu.old_chat_member.status.value if cmu.old_chat_member else "")
     new_status = (cmu.new_chat_member.status.value if cmu.new_chat_member else "")
-    name = _display_name(cmu.user)
+    # cmu.user may be None for anonymous admin actions or channel posts
+    name = _display_name(cmu.user) if cmu.user else "a member"
 
     if old_status in ("left", "kicked") and new_status in ("member", "administrator", "restricted"):
         await _send_join_or_leave_message(context.bot, chat.id, "welcome", [name])

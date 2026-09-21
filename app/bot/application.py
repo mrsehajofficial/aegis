@@ -1,4 +1,5 @@
 import logging
+import os
 
 from telegram import BotCommand, BotCommandScopeAllGroupChats
 from telegram.ext import (
@@ -10,6 +11,7 @@ from telegram.ext import (
     MessageHandler,
     filters as ptb_filters,
 )
+from telegram.request import HTTPXRequest
 
 from app.config.settings import settings
 from app.bot.handlers.commands import (
@@ -156,11 +158,43 @@ async def _post_init(application: Application) -> None:
     mark_started()
 
 
+def _make_request() -> HTTPXRequest:
+    """Build the bot's HTTP request backend with proxy auto-detection disabled.
+
+    python-telegram-bot uses httpx internally for all Telegram API calls.  httpx
+    auto-detects proxies from HTTP_PROXY / HTTPS_PROXY / ALL_PROXY environment
+    variables.  On some hosts (notably PythonAnywhere) these may be set
+    system-wide and point at a dead or captive proxy, causing every API call to
+    fail with ``httpx.ProxyError: 503 Service Unavailable`` and crashing the
+    bot polling loop.
+
+    The fix: configure HTTPXRequest. If ``settings.HTTP_PROXY_URL`` is set,
+    route through that proxy. Otherwise, disable environment proxy detection
+    via trust_env=False so broken environment proxies are ignored.
+    """
+    raw_proxy = (settings.HTTP_PROXY_URL or "").strip()
+    proxy = raw_proxy if raw_proxy else None
+    httpx_kwargs = {}
+    if not proxy:
+        httpx_kwargs["trust_env"] = False
+
+    return HTTPXRequest(
+        connection_pool_size=settings.HTTP_POOL_SIZE if settings.HTTP_POOL_SIZE else 100,
+        connect_timeout=settings.HTTP_CONNECT_TIMEOUT,
+        read_timeout=settings.HTTP_READ_TIMEOUT,
+        write_timeout=settings.HTTP_WRITE_TIMEOUT,
+        pool_timeout=10.0,
+        proxy=proxy,
+        httpx_kwargs=httpx_kwargs,
+    )
+
+
 def build_application() -> Application:
     """Build and configure the PTB Application with all registered handlers."""
     app = (
         ApplicationBuilder()
         .token(settings.BOT_TOKEN)
+        .request(_make_request())
         .post_init(_post_init)
         .build()
     )

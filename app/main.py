@@ -7,11 +7,34 @@ Usage:
 """
 import asyncio
 import logging
+import os
 import secrets
 import sys
 from pathlib import Path
 
-from telegram.ext import Application
+# Clear any proxy environment variables before httpx is imported anywhere.
+# python-telegram-bot uses httpx internally for all Telegram API calls, and
+# httpx auto-detects proxies from HTTP_PROXY / HTTPS_PROXY / ALL_PROXY etc.
+# On some hosting environments (e.g. PythonAnywhere) these may be set system-
+# wide and cause every outbound call to fail with ProxyError.  Clearing them
+# here ensures the bot always connects directly.
+for _var in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy",
+             "ALL_PROXY", "all_proxy", "no_proxy", "NO_PROXY"):
+    os.environ.pop(_var, None)
+
+import httpx
+
+from telegram import BotCommand, BotCommandScopeAllGroupChats
+from telegram.ext import (
+    Application,
+    ApplicationBuilder,
+    CallbackQueryHandler,
+    CommandHandler,
+    ChatMemberHandler,
+    MessageHandler,
+    filters as ptb_filters,
+)
+from telegram.request import HTTPXRequest
 
 from app.config.settings import settings
 from app.bot.application import build_application

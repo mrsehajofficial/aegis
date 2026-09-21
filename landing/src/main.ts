@@ -60,7 +60,13 @@ class AegisLandingApp {
           const targetEl = document.querySelector<HTMLElement>(targetId);
           if (targetEl) {
             setTimeout(() => {
-              this.scroller.scrollTo(targetEl);
+              // Use native scrollIntoView as fallback; scroller.scrollTo
+              // may not accept bare HTMLElement in all build configs.
+              try {
+                this.scroller.scrollTo(targetEl);
+              } catch (_err) {
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
             }, 220);
           }
         }
