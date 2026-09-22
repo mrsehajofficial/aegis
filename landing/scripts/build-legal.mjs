@@ -7,6 +7,10 @@
  * landing/terms.html, so the site can never drift from the repository: edit the
  * markdown, run `npm run dev` (or `npm run build`) and the pages follow.
  *
+ * Deploy builds (e.g. Anybuild) only receive the landing/ directory, so the
+ * script falls back to the vendored copies in landing/legal/ when the repo
+ * root files are not present in the build context.
+ *
  * Output is deterministic — no build timestamp — so regenerating unchanged
  * documents produces no diff.
  */
@@ -22,9 +26,14 @@ const repo = join(landing, '..');
 
 const REPO_URL = 'https://github.com/mrsehajofficial/aegis/blob/main';
 
+// Deploy environments (e.g. Anybuild) build from landing/ alone, so the parent
+// directory does not exist there. Canonical copies live at the repo root during
+// local development; landing/legal/ holds vendored copies for deployments.
+const DOC_SEARCH_PATHS = [repo, landing, join(landing, 'legal')];
+
 const PAGES = [
   {
-    source: join(repo, 'PRIVACY.md'),
+    fileName: 'PRIVACY.md',
     out: join(landing, 'privacy.html'),
     title: 'Privacy Policy',
     badge: 'PRIVACY // DATA HANDLING',
@@ -32,7 +41,7 @@ const PAGES = [
       "How the Aegis Telegram bot handles data: what is stored, what never leaves the operator's host, and how to have data deleted.",
   },
   {
-    source: join(repo, 'TERMS.md'),
+    fileName: 'TERMS.md',
     out: join(landing, 'terms.html'),
     title: 'Terms of Service',
     badge: 'TERMS // ACCEPTABLE USE',
@@ -41,12 +50,27 @@ const PAGES = [
   },
 ];
 
+async function resolveSource(fileName) {
+  for (const dir of DOC_SEARCH_PATHS) {
+    const candidate = join(dir, fileName);
+    try {
+      return { source: candidate, markdown: await readFile(candidate, 'utf8') };
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
+  }
+  throw new Error(
+    `build-legal: could not find ${fileName} in any of:\n` +
+      DOC_SEARCH_PATHS.map((dir) => `  - ${join(dir, fileName)}`).join('\n')
+  );
+}
+
 const template = await readFile(join(landing, 'legal.template.html'), 'utf8');
 
 for (const page of PAGES) {
-  const markdown = await readFile(page.source, 'utf8');
+  const { markdown } = await resolveSource(page.fileName);
   const content = await marked.parse(markdown, { gfm: true });
-  const sourceFile = relative(repo, page.source);
+  const sourceFile = page.fileName;
 
   const html = template
     .replaceAll('{{TITLE}}', page.title)
