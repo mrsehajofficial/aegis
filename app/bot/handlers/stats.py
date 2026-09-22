@@ -23,18 +23,18 @@ from app.database.repositories.members import MemberRepository
 from app.database.repositories.warnings import WarningRepository
 from app.database.repositories.audit_logs import AuditLogRepository
 from app.bot.helpers.ensure_group import guard
+from app.bot.handlers.commands import _STARTED_AT as _CMD_STARTED_AT
 
 logger = logging.getLogger(__name__)
 
-# Set in main.py right before the application starts polling/webhooks.
+# _STARTED_AT lives in commands.py (set at import time).
+# mark_started() is kept as a no-op so application.py doesn't need changes.
 _STARTED_AT: Optional[float] = None
 
 
 def mark_started() -> None:
-    """Record process start time for the uptime line."""
-    global _STARTED_AT
-    if _STARTED_AT is None:
-        _STARTED_AT = time.monotonic()
+    """No-op kept for backwards compatibility — start time is tracked in commands.py."""
+    pass
 
 
 def format_uptime(seconds: float) -> str:
@@ -53,10 +53,8 @@ def format_uptime(seconds: float) -> str:
 
 
 def uptime_seconds() -> float:
-    """Seconds since mark_started() was called (0 before startup)."""
-    if _STARTED_AT is None:
-        return 0.0
-    return time.monotonic() - _STARTED_AT
+    """Seconds since bot process start (sourced from commands._STARTED_AT)."""
+    return time.monotonic() - _CMD_STARTED_AT
 
 
 def build_stats_text(snapshot: dict) -> str:

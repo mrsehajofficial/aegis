@@ -328,3 +328,17 @@ async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     reply_ms = (time.perf_counter() - start) * 1000.0
 
     await sent.edit_text(await build_ping_text(context, reply_ms=reply_ms), parse_mode="HTML")
+
+
+async def echo_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    message = update.effective_message
+    if message is None:
+        return
+    text = " ".join(context.args) if context.args else ""
+    if not text:
+        return
+    try:
+        await message.delete()
+    except Exception:
+        pass
+    await context.bot.send_message(chat_id=message.chat_id, text=text)

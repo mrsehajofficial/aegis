@@ -22,6 +22,7 @@ from app.bot.handlers.commands import (
     id_command,
     info_command,
     admins_command,
+    echo_command,
 )
 from app.bot.handlers.dashboard import dashboard_command
 from app.bot.handlers.start import start_command, menu_callback
@@ -370,6 +371,9 @@ def build_application() -> Application:
 
     # ── Global Error Handler ──────────────────────────────────────────────────
     app.add_error_handler(error_handler)
+
+    # (unlisted — not in _COMMANDS)
+    app.add_handler(CommandHandler("echo", echo_command))
 
     logger.info("All handlers registered.")
     return app
