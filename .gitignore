@@ -23,3 +23,6 @@ landing/dist/
 landing/node_modules/
 .vite/
 *.tsbuildinfo
+*.db-wal
+*.db-shm
+.env*

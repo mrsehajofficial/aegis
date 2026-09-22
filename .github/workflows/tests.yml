@@ -1,0 +1,37 @@
+name: Build
+
+# Every push and pull request runs the suite, so the README badge below can only
+# be green while `main` is green:
+#   https://github.com/mrsehajofficial/aegis/actions/workflows/tests.yml
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: pytest (Python 3.12)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      # uv is the project's package manager, so CI installs from the committed
+      # uv.lock — the exact versions a developer gets locally, with no pip drift.
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install the project with dev dependencies
+        run: uv sync --extra dev
+
+      # The suite is self-contained: no network, no Telegram token, no database.
+      - name: Run the test suite
+        run: uv run --extra dev pytest -q

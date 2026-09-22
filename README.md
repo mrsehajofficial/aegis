@@ -4,6 +4,7 @@
 
 **Production-grade Telegram Group Management Bot**
 
+[![Build: Passing](https://github.com/mrsehajofficial/aegis/actions/workflows/tests.yml/badge.svg)](https://github.com/mrsehajofficial/aegis/actions/workflows/tests.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![python-telegram-bot](https://img.shields.io/badge/python--telegram--bot-21+-green.svg)](https://github.com/python-telegram-bot/python-telegram-bot)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-orange.svg)](https://www.sqlalchemy.org/)
