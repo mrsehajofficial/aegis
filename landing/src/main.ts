@@ -98,7 +98,7 @@ class AegisLandingApp {
           navigator.clipboard.writeText(codeElem.textContent?.trim() || '');
           const originalText = btn.textContent;
           btn.textContent = 'COPIED';
-          btn.style.color = 'var(--signal-emerald)';
+          btn.style.color = 'var(--signal-accent)';
           setTimeout(() => {
             btn.textContent = originalText;
             btn.style.color = '';

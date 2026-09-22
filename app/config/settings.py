@@ -43,12 +43,15 @@ class Settings(BaseSettings):
     CAPTCHA_TIMEOUT_SECONDS: int = 120
     CAPTCHA_ACTION: str = "kick"  # "kick" | "ban"
 
-    # ── Opt-in reputation feed ────────────────────────────────────────────────
+    # ── Future shared reputation feed (not yet implemented) ───────────────────
     # Empty (the default) means a fully private instance: no outbound calls, no
-    # shared state, protection works offline. Point it at a shared feed to
-    # pre-warn every participating instance about a spam campaign that already
-    # hit another instance — the one feature that gets stronger with adoption.
-    # Only a salted fingerprint and a pseudonymous group token are ever sent.
+    # shared state, protection works offline. When the shared feed is built these
+    # will let every participating instance pre-warn others about a spam campaign
+    # that already hit another instance — the one feature that gets stronger with
+    # adoption. Until then no HTTP requests are made.
+    #
+    # Planned design: send only a salted fingerprint and a pseudonymous group
+    # token. Salted fingerprint = HMAC-SHA256(key=SALT, msg=fingerprint).
     REPUTATION_FEED_URL: str = ""       # e.g. "https://feed.example.com"
     REPUTATION_FEED_TOKEN: str = ""     # optional bearer token for private feeds
     REPUTATION_FEED_TIMEOUT: float = 3.0

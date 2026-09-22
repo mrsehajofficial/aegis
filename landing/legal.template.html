@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!-- generated -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{{DESCRIPTION}}" />
+  <title>{{TITLE}} // AEGIS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="page-wrapper">
+    <header class="legal-header">
+      <a href="/" class="brand-logo">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        <span>AEGIS // {{TITLE}}</span>
+      </a>
+      <nav class="legal-nav">
+        <a href="/">BACK TO HOME</a>
+        <a href="/privacy.html">PRIVACY</a>
+        <a href="/terms.html">TERMS</a>
+      </nav>
+    </header>
+
+    <main class="legal-shell">
+      <div class="legal-page">
+        <div class="badge-tag badge-accent">{{BADGE}}</div>
+        <article id="legal-content">{{CONTENT}}</article>
+        <p class="legal-source">
+          Rendered from <a href="{{SOURCE_URL}}">{{SOURCE_FILE}}</a> — the same file the bot's code is
+          documented against, so this page describes what the software actually does.
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/src/pages/legal.ts"></script>
+</body>
+</html>

@@ -8,7 +8,7 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![python-telegram-bot](https://img.shields.io/badge/python--telegram--bot-21+-green.svg)](https://github.com/python-telegram-bot/python-telegram-bot)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-orange.svg)](https://www.sqlalchemy.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 *Aegis — the emerald guardian of your Telegram groups. Deterministic, dependable protection.*
@@ -36,6 +36,7 @@
 - [Development](#development)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
+- [Privacy & Terms](#privacy--terms)
 ---
 
 ## ✨ Features
@@ -455,9 +456,20 @@ Feel free to open an issue or pull request if you find a bug or want to suggest 
 
 ---
 
+## 🔐 Privacy & Terms
+
+| Document | What it covers |
+|----------|----------------|
+| [Privacy Policy](PRIVACY.md) | What the bot stores, the short-lived state it keeps, the **only three outbound connections** it makes, retention, and how to have data deleted |
+| [Terms of Service](TERMS.md) | Acceptable use, group-admin responsibilities, availability, moderation outcomes and liability |
+
+Both are **operator templates**: fill in every `[BRACKETED]` placeholder before you publish an instance. They describe the software's actual behaviour — including the fact that removing the bot does not delete stored group data — and the landing site renders them at `/privacy.html` and `/terms.html` directly from these two files, so the published policy can never drift from the code.
+
+---
+
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Aegis is licensed under the **GNU Affero General Public License v3.0** (AGPL-3.0) - see the [LICENSE](LICENSE) file for details. If you run a modified Aegis as a network service, the AGPL requires you to offer its source to the users of that service.
 
 ---
 

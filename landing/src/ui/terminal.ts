@@ -177,7 +177,7 @@ export class TacticalTerminal {
             `↳ Version: 0.1.0-deterministic`,
             `↳ Engine: Python 3.11+ / PTB v21+ / SQLAlchemy Asyncio`,
             `↳ Active Session: SQLite + asyncpg verified`,
-            `↳ Emerald Guardian: FULLY ARMED`
+            `↳ Aegis Guardian: FULLY ARMED`
           ],
         };
 

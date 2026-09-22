@@ -29,7 +29,6 @@ Backends mirror ``flood.py``:
   restarts, and between multiple bots pointed at the same ``REDIS_URL``.
 """
 import hashlib
-import hmac
 import logging
 import time
 from collections import defaultdict, deque
@@ -61,7 +60,15 @@ def normalize_text_for_fingerprint(text: str) -> str:
 
 
 def fingerprint(text: str) -> str:
-    """One-way SHA-256 of the normalised text (never the raw content)."""
+    """
+    One-way SHA-256 of the normalised text (never the raw content).
+
+    .. note::
+       This is an unsalted hash of normalised text. Salting and
+       pseudonymous tokens are planned for a future shared-reputation feed; they
+       are not yet implemented and :data:`settings.REPUTATION_FEED_URL` remains
+       unused.
+    """
     return hashlib.sha256(
         normalize_text_for_fingerprint(text).encode("utf-8")
     ).hexdigest()

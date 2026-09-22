@@ -28,7 +28,7 @@ h1, h2, h3, h4 {
   font-size: clamp(2.5rem, 6vw, 5rem);
   letter-spacing: -0.05em;
   text-transform: uppercase;
-  background: linear-gradient(180deg, #eafff4 0%, #7dffc4 55%, #2ef59d 100%);
+  background: linear-gradient(180deg, #eef1f6 0%, #b7d5ec 55%, #7fb6e0 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -68,28 +68,28 @@ h1, h2, h3, h4 {
   background-color: currentColor;
 }
 
-.badge-emerald {
-  color: var(--signal-emerald);
-  border-color: rgba(46, 245, 157, 0.28);
-  background: rgba(46, 245, 157, 0.07);
+.badge-accent {
+  color: var(--signal-accent);
+  border-color: rgba(127, 182, 224, 0.28);
+  background: rgba(127, 182, 224, 0.07);
 }
 
-.badge-mint {
-  color: var(--signal-mint);
-  border-color: rgba(125, 255, 196, 0.25);
-  background: rgba(125, 255, 196, 0.05);
+.badge-soft {
+  color: var(--signal-accent-soft);
+  border-color: rgba(183, 213, 236, 0.25);
+  background: rgba(183, 213, 236, 0.05);
 }
 
-.badge-green {
-  color: var(--signal-green);
-  border-color: rgba(52, 211, 153, 0.25);
-  background: rgba(52, 211, 153, 0.06);
+.badge-warn {
+  color: var(--signal-warn);
+  border-color: rgba(224, 169, 109, 0.25);
+  background: rgba(224, 169, 109, 0.06);
 }
 
 .badge-deep {
   color: var(--signal-deep);
-  border-color: rgba(15, 122, 77, 0.35);
-  background: rgba(15, 122, 77, 0.08);
+  border-color: rgba(90, 125, 158, 0.35);
+  background: rgba(90, 125, 158, 0.08);
 }
 
 .badge-danger {

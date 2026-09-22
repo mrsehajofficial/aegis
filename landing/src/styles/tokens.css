@@ -1,32 +1,40 @@
 :root {
-  /* Pure Black Base Palette */
+  /* Palette sampled from the guardian avatar (landing/public/character.png):
+     pure-black ground, graphite jacket greys (#181820–#303840), the white
+     sticker outline, and one steel-blue emblem accent. Retheming? Sample the
+     avatar first and keep every value on that ramp. */
+
+  /* Black & Graphite Base Palette */
   --bg-obsidian: #000000;
-  --bg-surface-0: #050806;
-  --bg-surface-1: #0a0c0b;
-  --bg-surface-2: #10120f;
+  --bg-surface-0: #07080b;
+  --bg-surface-1: #0d0f15;
+  --bg-surface-2: #141821;
   --bg-surface-glass: rgba(0, 0, 0, 0.72);
 
   /* Borders & Grids */
-  --border-subtle: rgba(125, 255, 196, 0.12);
-  --border-medium: rgba(125, 255, 196, 0.22);
-  --border-focus: rgba(46, 245, 157, 0.5);
-  --grid-line: rgba(125, 255, 196, 0.05);
+  --border-subtle: rgba(154, 172, 196, 0.12);
+  --border-medium: rgba(154, 172, 196, 0.22);
+  --border-focus: rgba(127, 182, 224, 0.5);
+  --grid-line: rgba(154, 172, 196, 0.05);
 
   /* Typography */
-  --text-primary: #eafff4;
-  --text-secondary: #a8d6bf;
-  --text-muted: #6e9c86;
-  --text-inverse: #04140c;
+  --text-primary: #eef1f6;
+  --text-secondary: #a7b3c2;
+  --text-muted: #7d8b9c;
+  --text-inverse: #070a10;
 
-  /* Emerald Signals */
-  --signal-emerald: #2ef59d;
-  --signal-emerald-glow: rgba(46, 245, 157, 0.28);
-  --signal-mint: #7dffc4;
-  --signal-mint-glow: rgba(125, 255, 196, 0.18);
-  --signal-green: #34d399;
-  --signal-green-glow: rgba(52, 211, 153, 0.22);
-  --signal-deep: #0f7a4d;
-  --signal-deep-glow: rgba(15, 122, 77, 0.3);
+  /* Guardian Signals — steel blue lifted from the avatar's wolf emblem
+     (#506070–#687888), brightened so it stays legible on pure black.
+     The warm sand is the character's highlight tone: it keeps terminal
+     warnings a different temperature from the blue "success" signal. */
+  --signal-accent: #7fb6e0;
+  --signal-accent-glow: rgba(127, 182, 224, 0.28);
+  --signal-accent-soft: #b7d5ec;
+  --signal-accent-soft-glow: rgba(183, 213, 236, 0.18);
+  --signal-warn: #e0a96d;
+  --signal-warn-glow: rgba(224, 169, 109, 0.22);
+  --signal-deep: #5a7d9e;
+  --signal-deep-glow: rgba(90, 125, 158, 0.3);
   --signal-danger: #ff6b7d;
   --signal-danger-glow: rgba(255, 107, 125, 0.25);
 

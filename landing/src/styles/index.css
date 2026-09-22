@@ -47,7 +47,7 @@ html, body {
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 2.5rem;
-  background: rgba(5, 13, 10, 0.72);
+  background: rgba(7, 8, 11, 0.72);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-subtle);
@@ -68,7 +68,7 @@ html, body {
 .brand-icon {
   width: 28px;
   height: 28px;
-  stroke: var(--signal-emerald);
+  stroke: var(--signal-accent);
 }
 
 .nav-links {
@@ -189,8 +189,8 @@ html, body {
   pointer-events: none;
   transition: pointer-events 0.1s;
   z-index: 2;
-  background: rgba(4, 8, 6, 0.82);
-  border: 1px solid rgba(125, 255, 196, 0.14);
+  background: rgba(7, 8, 11, 0.82);
+  border: 1px solid rgba(154, 172, 196, 0.14);
   border-radius: var(--radius-lg);
   padding: 1.75rem;
   backdrop-filter: blur(10px);
@@ -276,7 +276,7 @@ html, body {
   font-family: var(--font-mono);
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--signal-emerald);
+  color: var(--signal-accent);
 }
 
 .spec-label {
@@ -334,7 +334,7 @@ html, body {
 .feature-icon {
   width: 36px;
   height: 36px;
-  stroke: var(--signal-emerald);
+  stroke: var(--signal-accent);
   margin-bottom: 1rem;
 }
 
@@ -475,7 +475,7 @@ html, body {
 }
 
 .mobile-drawer-link:hover {
-  color: var(--signal-emerald);
+  color: var(--signal-accent);
 }
 
 .mobile-drawer-footer {
@@ -550,7 +550,7 @@ html, body {
     margin: 0 auto;
     width: calc(100% - 1.5rem);
     max-width: 480px;
-    background: rgba(2, 4, 3, 0.92);
+    background: rgba(4, 5, 7, 0.92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     padding: 1.25rem;
