@@ -44,9 +44,12 @@ COOLDOWN_BETWEEN_REPLIES_SEC = 2.0
 AWAY_MESSAGE_COOLDOWN_SEC = 900.0  # 15 minutes
 
 
-def _clean_old_cache() -> None:
-    """Housekeeping for in-memory cooldown trackers."""
-    now = time.monotonic()
+def _clean_old_cache(now: float) -> None:
+    """Housekeeping for in-memory cooldown trackers.
+
+    Takes the caller's clock reading instead of sampling its own, so an injected
+    ``now`` drives the whole evaluation against one consistent timeline.
+    """
     # Clean entries older than 1 hour
     for key in list(_chat_last_reply.keys()):
         if now - _chat_last_reply[key] > 3600:
@@ -214,6 +217,7 @@ async def evaluate_business_message(
     chat_id: int,
     from_user_id: int,
     text: str,
+    now: Optional[float] = None,
 ) -> Optional[str]:
     """
     Evaluate an incoming message in a Telegram Business private chat.
@@ -225,9 +229,12 @@ async def evaluate_business_message(
     3. Throttles rapid replies (anti-loop).
     4. Evaluates keyword rules (contains / exact).
     5. Falls back to greeting / away if applicable.
+
+    ``now`` is injectable so tests can advance time without patching the clock.
     """
-    _clean_old_cache()
-    now = time.monotonic()
+    if now is None:
+        now = time.monotonic()
+    _clean_old_cache(now)
     cache_key = (connection_id, chat_id)
 
     async with get_session() as session:
@@ -246,9 +253,12 @@ async def evaluate_business_message(
             logger.debug("Ignoring business message sent by account owner %d", from_user_id)
             return None
 
-        # Anti-spam debounce: avoid sending multiple replies in quick succession to same chat
-        last_reply = _chat_last_reply.get(cache_key, 0.0)
-        if now - last_reply < COOLDOWN_BETWEEN_REPLIES_SEC:
+        # Anti-spam debounce: avoid sending multiple replies in quick succession to same chat.
+        # No entry means "never replied", which must not debounce: a 0.0 default
+        # would look like a reply sent at clock zero, i.e. *inside* the cooldown
+        # on any machine whose monotonic clock is younger than the cooldown.
+        last_reply = _chat_last_reply.get(cache_key)
+        if last_reply is not None and now - last_reply < COOLDOWN_BETWEEN_REPLIES_SEC:
             logger.debug("Business reply debounced for chat %d (within cooldown)", chat_id)
             return None
 
@@ -289,8 +299,11 @@ async def evaluate_business_message(
 
         # 3. Away / Out-of-Office Fallback
         if conn.away_enabled and conn.away_message:
-            last_away = _chat_last_away.get(cache_key, 0.0)
-            if now - last_away >= AWAY_MESSAGE_COOLDOWN_SEC:
+            # Same sentinel rule as the debounce above: no entry means the
+            # cooldown has elapsed, otherwise a freshly booted host (small
+            # monotonic clock) would swallow the first away reply for 15 minutes.
+            last_away = _chat_last_away.get(cache_key)
+            if last_away is None or now - last_away >= AWAY_MESSAGE_COOLDOWN_SEC:
                 _chat_last_away[cache_key] = now
                 _chat_last_reply[cache_key] = now
                 logger.info("Sent business away message to chat %d via connection %s", chat_id, connection_id)

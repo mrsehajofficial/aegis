@@ -29,6 +29,7 @@ from app.services.business import (
     delete_business_rule,
     get_business_rules,
     evaluate_business_message,
+    AWAY_MESSAGE_COOLDOWN_SEC,
     _chat_last_reply,
     _chat_last_away,
     _greeted_chats,
@@ -276,24 +277,55 @@ class TestBusinessService:
             await set_greeting_message(8001, "Hi! Welcome.")
             await set_away_message(8001, "I am away right now.")
 
+            # Drive the cooldowns with an injected clock whose uptime is small.
+            # A fresh machine — a CI runner, a fresh container, a rebooted host —
+            # reports time.monotonic() as seconds since boot, so "never sent"
+            # must not be modelled as a timestamp of 0.0: at an uptime of 30s
+            # that read as a reply 30s ago and silenced the away fallback.
+            now = 30.0
+
             # First message that matches no keywords triggers greeting
             reply = await evaluate_business_message(
                 connection_id="c6",
                 chat_id=111,
                 from_user_id=222,
                 text="Random question without keywords",
+                now=now,
             )
             assert reply == "Hi! Welcome."
 
-            # Second message: chat already greeted, triggers away fallback
-            _chat_last_reply.clear()
+            # Second message: chat already greeted, so the away fallback answers
+            # (the 2s reply debounce has passed, and no away message has been
+            # sent yet, so the 15-minute cooldown does not apply)
             reply2 = await evaluate_business_message(
                 connection_id="c6",
                 chat_id=111,
                 from_user_id=222,
                 text="Another unrecognized question",
+                now=now + 3.0,
             )
             assert reply2 == "I am away right now."
+
+            # A third unrecognized message inside the away cooldown stays
+            # unanswered instead of replying to every single message
+            reply3 = await evaluate_business_message(
+                connection_id="c6",
+                chat_id=111,
+                from_user_id=222,
+                text="Still waiting for a reply",
+                now=now + 60.0,
+            )
+            assert reply3 is None
+
+            # Once the cooldown elapses the fallback may answer again
+            reply4 = await evaluate_business_message(
+                connection_id="c6",
+                chat_id=111,
+                from_user_id=222,
+                text="Are you there?",
+                now=now + 3.0 + AWAY_MESSAGE_COOLDOWN_SEC,
+            )
+            assert reply4 == "I am away right now."
 
 
 # ── Handler Tests ─────────────────────────────────────────────────────────────
