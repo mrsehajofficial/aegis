@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_BUSINESS_RULES = [
     {
         "trigger": "price",
-        "response": "💰 My current pricing starts at $99/mo. For custom plans or special requirements, please let me know what you need!",
+        "response": "Hey there, let's discuss your requirements first then we'll decide what's the best pricing for you!",
         "match_type": "contains",
     },
     {
@@ -22,7 +22,7 @@ DEFAULT_BUSINESS_RULES = [
     },
     {
         "trigger": "support",
-        "response": "🛠️ Need help? Please describe your issue in detail and I will reply to you personally shortly.",
+        "response": "🛠️ Need help? Please describe your issue in detail and I will reply to you shortly.",
         "match_type": "contains",
     },
     {
