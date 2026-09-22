@@ -16,7 +16,7 @@
 
 **Aegis — Telegram group management bot**
 
-Last updated: **22 September 2026** · Applies to the bot operated as **[BOT USERNAME]** and to the Aegis software in this repository.
+Last updated: **22 September 2026** · Applies to the bot operated as **@official_aegis_bot** and to the Aegis software in this repository.
 
 Aegis is self-hosted software. There is no central Aegis service, no vendor account, and no data flowing to the people who wrote the code: whoever runs the bot — the "operator" — holds the database. This policy describes exactly what the software stores, what it sends, what it deliberately does not do, and how to get data removed.
 
@@ -24,7 +24,7 @@ Aegis is self-hosted software. There is no central Aegis service, no vendor acco
 
 | Role | Who |
 |---|---|
-| **Data controller** — decides why and how personal data is processed | The operator of the instance you use: **[OPERATOR LEGAL NAME]**, contact **[CONTACT EMAIL]** |
+| **Data controller** — decides why and how personal data is processed | The operator of the instance you use: **Sehaj Varma**, contact **mr.sehaj.official@gmail.com** |
 | **Software authors** — publish the code only | The Aegis contributors. They receive **no data** from any instance. |
 
 If you run Aegis yourself, *you* are the controller and this document is your template.
@@ -102,14 +102,14 @@ Telegram processes account data under [Telegram's own privacy policy](https://te
 
 ## 10. Your rights
 
-Depending on where you live, you may have the right to access, correct, delete, restrict or port your data, and to object to processing. Contact the operator at **[CONTACT EMAIL]**. Group admins can already clear much of the data themselves with the commands in section 9.
+Depending on where you live, you may have the right to access, correct, delete, restrict or port your data, and to object to processing. Contact the operator at **mr.sehaj.official@gmail.com**. Group admins can already clear much of the data themselves with the commands in section 9.
 
 ## 11. Security
 
 - The bot token lives in `.env`, created with `600` permissions by `python -m app.setup`, and is never written to logs in full.
 - Webhook mode signs every request with a secret token; Mini App requests are verified with Telegram's HMAC scheme plus an `auth_date` freshness window and a live admin check through the Bot API.
 - The database and Redis belong to the operator; controlling access to them is the operator's responsibility.
-- No system is perfectly secure. Report a suspected issue to **[CONTACT EMAIL]** or through the repository's issue tracker.
+- No system is perfectly secure. Report a suspected issue to **mr.sehaj.official@gmail.com** or through the repository's issue tracker.
 
 ## 12. Children
 
@@ -125,5 +125,5 @@ Material changes update the date at the top of this document and appear in the r
 
 ## 15. Contact
 
-**[OPERATOR LEGAL NAME]** — **[CONTACT EMAIL]**
+**Sehaj Varma** — **mr.sehaj.official@gmail.com**
 

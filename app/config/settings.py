@@ -43,18 +43,20 @@ class Settings(BaseSettings):
     CAPTCHA_TIMEOUT_SECONDS: int = 120
     CAPTCHA_ACTION: str = "kick"  # "kick" | "ban"
 
-    # ── Future shared reputation feed (not yet implemented) ───────────────────
-    # Empty (the default) means a fully private instance: no outbound calls, no
-    # shared state, protection works offline. When the shared feed is built these
-    # will let every participating instance pre-warn others about a spam campaign
-    # that already hit another instance — the one feature that gets stronger with
-    # adoption. Until then no HTTP requests are made.
+    # ── Shared reputation feed ────────────────────────────────────────────────
+    # When REPUTATION_FEED_URL is set, the bot contributes a salted fingerprint
+    # and a pseudonymous group token to that endpoint after confirming spam.
+    # Other instances querying the same feed learn about a campaign that already
+    # hit another group, so the same spam text is pre-flagged network-wide.
     #
-    # Planned design: send only a salted fingerprint and a pseudonymous group
-    # token. Salted fingerprint = HMAC-SHA256(key=SALT, msg=fingerprint).
+    # Empty (the default) means a fully private instance: no outbound calls, no
+    # shared state, protection works offline. Set REPUTATION_SALT to a long
+    # random secret so fingerprints differ per deployment and cannot be reversed
+    # by feed readers. A salted fingerprint = HMAC-SHA256(key=SALT, msg=fingerprint).
     REPUTATION_FEED_URL: str = ""       # e.g. "https://feed.example.com"
     REPUTATION_FEED_TOKEN: str = ""     # optional bearer token for private feeds
     REPUTATION_FEED_TIMEOUT: float = 3.0
+    REPUTATION_SALT: str = ""           # long random secret per deployment
 
     # ── Version / update check ────────────────────────────────────────────────
     # Anonymous GET against the public GitHub releases API so a distributed

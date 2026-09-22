@@ -36,3 +36,9 @@ class TestDefaults:
 
     def test_database_url_default_is_local_sqlite(self):
         assert Settings.model_fields["DATABASE_URL"].default.startswith("sqlite")
+
+    def test_reputation_feed_url_defaults_to_empty(self):
+        assert Settings.model_fields["REPUTATION_FEED_URL"].default == ""
+
+    def test_reputation_salt_defaults_to_empty(self):
+        assert Settings.model_fields["REPUTATION_SALT"].default == ""

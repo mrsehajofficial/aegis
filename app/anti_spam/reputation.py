@@ -27,8 +27,16 @@ Backends mirror ``flood.py``:
   process, which already covers every single-worker deployment.
 * :class:`RedisReputationStore` — shares fingerprints across workers and
   restarts, and between multiple bots pointed at the same ``REDIS_URL``.
+
+Outbound reputation feed (optional):
+  When ``settings.REPUTATION_FEED_URL`` is set, confirmed spam verdicts are
+  also reported to that remote feed. Only a *salted* fingerprint and a
+  *pseudonymised* group token are sent — never the message text, never the
+  raw chat ID. The feed is fire-and-forget: network failures are logged but
+  never block local protection.
 """
 import hashlib
+import hmac
 import logging
 import time
 from collections import defaultdict, deque
@@ -63,15 +71,101 @@ def fingerprint(text: str) -> str:
     """
     One-way SHA-256 of the normalised text (never the raw content).
 
-    .. note::
-       This is an unsalted hash of normalised text. Salting and
-       pseudonymous tokens are planned for a future shared-reputation feed; they
-       are not yet implemented and :data:`settings.REPUTATION_FEED_URL` remains
-       unused.
+    This is the *local* fingerprint — used for in-store lookups within a
+    single Redis namespace or process. When contributing to a shared
+    reputation feed, use :func:`salted_fingerprint` instead so the
+    outbound value is keyed with ``REPUTATION_SALT`` via HMAC-SHA-256.
     """
     return hashlib.sha256(
         normalize_text_for_fingerprint(text).encode("utf-8")
     ).hexdigest()
+
+
+def salted_fingerprint(text: str, salt: str) -> str:
+    """
+    HMAC-SHA256 of the normalised text keyed by ``salt``.
+
+    Unlike the local :func:`fingerprint`, a salted fingerprint cannot be
+    correlated across deployments — only instances that share the same
+    ``REPUTATION_SALT`` produce matching values. This is the value sent
+    to the optional shared reputation feed.
+    """
+    return hmac.new(
+        salt.encode("utf-8"),
+        normalize_text_for_fingerprint(text).encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def pseudonymize_chat_id(chat_id: int, salt: str) -> str:
+    """
+    One-way pseudonym for a group's chat ID.
+
+    The feed receives this instead of the raw chat ID so the feed operator
+    cannot learn which Telegram group contributed a given flag — only that
+    it came from a unique, stable, unlinkable pseudonym per deployment.
+    """
+    return hmac.new(
+        salt.encode("utf-8"),
+        f"chat:{chat_id}".encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+async def contribute_to_feed(
+    text: str, chat_id: int, now: Optional[float] = None
+) -> bool:
+    """
+    Report a confirmed spam verdict to the shared reputation feed.
+
+    Sends a **salted fingerprint** and a **pseudonymised group token** — never
+    the message text and never the raw chat ID. The call is fire-and-forget:
+    any network or HTTP error is logged and returns ``False`` so local
+    protection is unaffected.
+
+    Returns ``True`` when the feed accepted the contribution, ``False``
+    otherwise (including when no feed is configured).
+    """
+    feed_url = getattr(settings, "REPUTATION_FEED_URL", "") or ""
+    if not feed_url:
+        return False
+
+    salt = getattr(settings, "REPUTATION_SALT", "") or ""
+    if not salt:
+        logger.warning(
+            "REPUTATION_FEED_URL is set but REPUTATION_SALT is empty — "
+            "refusing to send unsalted fingerprints to the feed."
+        )
+        return False
+
+    payload = {
+        "fingerprint": salted_fingerprint(text, salt),
+        "group_token": pseudonymize_chat_id(chat_id, salt),
+    }
+
+    token = getattr(settings, "REPUTATION_FEED_TOKEN", "") or ""
+    headers = {"Content-Type": "application/json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    timeout = getattr(settings, "REPUTATION_FEED_TIMEOUT", 3.0)
+
+    try:
+        import httpx
+
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.post(feed_url.rstrip("/"), json=payload, headers=headers)
+        if resp.status_code in (200, 201, 202, 204):
+            logger.debug("Reputation feed: contribution accepted.")
+            return True
+        logger.warning(
+            f"Reputation feed returned HTTP {resp.status_code}; "
+            f"payload not stored by the feed."
+        )
+    except Exception as e:
+        # Never let a feed outage affect local spam protection.
+        logger.debug(f"Reputation feed contribution failed ({e}); continuing.")
+    return False
 
 
 class ReputationStore(Protocol):
@@ -307,6 +401,10 @@ async def record_spam(
     Callers must have already decided the message is spam, so over-reporting
     bugs surface as missing/extra records in tests rather than silent
     false positives in production groups.
+
+    If a shared reputation feed is configured (``REPUTATION_FEED_URL``),
+    a salted fingerprint and pseudonymised group token are reported there
+    too — fire-and-forget, so feed failures never block local protection.
     """
     if not text:
         return
@@ -321,6 +419,15 @@ async def record_spam(
             "trying local fallback."
         )
         await _fallback.flag(fp, chat_id, now, TTL_SECONDS)
+
+    # Fire-and-forget: report to the shared feed without awaiting or
+    # propagating errors. Local protection does not depend on it.
+    if getattr(settings, "REPUTATION_FEED_URL", ""):
+        try:
+            await contribute_to_feed(text, chat_id, now)
+        except Exception as e:
+            logger.debug(f"Reputation feed contribution skipped ({e}).")
+
 
 
 async def known_spam_groups(

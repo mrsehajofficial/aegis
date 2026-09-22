@@ -18,8 +18,11 @@ from telegram.ext import ContextTypes
 from app.anti_spam.flood import check_flood, reset_user
 from app.anti_spam.reputation import (
     FLAG_THRESHOLD,
+    contribute_to_feed,
     known_spam_groups,
     record_spam,
+    salted_fingerprint,
+    pseudonymize_chat_id,
 )
 from app.anti_spam.detector import (
     check_edited_spam,
