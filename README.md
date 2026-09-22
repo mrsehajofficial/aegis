@@ -66,6 +66,17 @@
 | **Welcome/Goodbye** | Configurable join/leave messages |
 | **Rules** | Group rules display and management |
 
+### 💼 Telegram Business Automation
+| Feature | Description |
+|---------|-------------|
+| **Business Connection** | Connect your Telegram Business account via Settings → Telegram Business → Chatbots |
+| **Auto-Reply** | Keyword-triggered replies sent on your behalf in private chats |
+| **Greeting Message** | Automatic welcome message for first-time contacts |
+| **Away / Out-of-Office** | Fallback reply sent when no keyword matches (15-min cooldown) |
+| **Keyword Rules** | Add unlimited trigger/response pairs with `contains` or `exact` matching |
+| **Inline Dashboard** | Toggle all features live from `/biz` without any config files |
+| **Safety Guards** | Never replies to your own messages; 2-second anti-loop debounce |
+
 ### 📊 Administration
 | Feature | Description |
 |---------|-------------|
@@ -82,6 +93,7 @@
 - **pip** or **uv** package manager
 - **Telegram Bot Token** from [@BotFather](https://t.me/BotFather)
 - **Database**: SQLite (built-in) or PostgreSQL 12+
+- *(Optional)* Telegram Business subscription to use the `/biz` auto-reply features
 
 ---
 
@@ -248,6 +260,27 @@ The wizard will:
 /logs                            — Recent moderation log (admins only)
 ```
 
+### 💼 Telegram Business (Private Chat)
+> Requires a Telegram Business subscription. Connect the bot once via
+> **Telegram Settings → Telegram Business → Chatbots**.
+
+```
+/biz                             — Open the Business automation dashboard
+/business                        — Alias for /biz
+/bizrules                        — List all active keyword auto-replies
+/bizadd <keyword> <response>     — Add or update a keyword rule
+/bizdel <keyword>                — Remove a keyword rule
+/bizgreeting [text|off]          — Set or toggle the greeting message
+/bizaway [text|off]              — Set or toggle the away/OOO message
+/bizstatus                       — Connection diagnostics
+```
+
+**How it works:**
+1. Connect the bot to your Telegram Business account once (Settings → Telegram Business → Chatbots, grant "Reply to messages" permission).
+2. Use `/bizadd pricing Our plans start at $99/mo.` to teach the bot your responses.
+3. When a customer's message matches a keyword, Aegis replies instantly *on your behalf* via `business_connection_id` — it appears as a message from you, not from the bot.
+4. Greeting and away messages handle first-time contacts and off-hours automatically.
+
 ---
 
 ## 🏗️ Architecture
@@ -265,6 +298,7 @@ aegis/
 │   ├── bot/
 │   │   ├── application.py   # Telegram Application builder
 │   │   ├── handlers/        # Command handlers
+│   │   │   ├── business.py  # Telegram Business auto-reply
 │   │   │   ├── commands.py  # Core commands
 │   │   │   ├── moderation.py # Ban/mute/warn
 │   │   │   ├── filters.py   # Auto-reply filters
@@ -283,6 +317,8 @@ aegis/
 │   │   └── repositories/    # Data access layer
 │   ├── moderation/          # Moderation logic
 │   └── services/            # Business logic
+│       ├── business.py      # Telegram Business service layer
+│       └── ...
 ├── migrations/              # Alembic migrations
 ├── tests/                   # Test suite
 ├── Dockerfile               # Docker build
@@ -306,6 +342,13 @@ aegis/
 | `blacklist` | Banned words per group |
 | `audit_logs` | Moderation action history |
 | `warnings` | User warning records |
+
+### Telegram Business Tables
+
+| Table | Description |
+|-------|-------------|
+| `business_connections` | Connected Telegram Business accounts (per user) |
+| `business_rules` | Keyword → response mapping for auto-replies |
 
 ---
 
@@ -394,7 +437,7 @@ sudo systemctl start aegis
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow these steps:
+Feel free to open an issue or pull request if you find a bug or want to suggest an improvement!
 
 1. **Fork** the repository
 2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)

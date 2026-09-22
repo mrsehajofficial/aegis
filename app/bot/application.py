@@ -6,6 +6,7 @@ from telegram import BotCommand, BotCommandScopeAllGroupChats
 from telegram.ext import (
     Application,
     ApplicationBuilder,
+    BusinessConnectionHandler,
     CallbackQueryHandler,
     CommandHandler,
     ChatMemberHandler,
@@ -79,6 +80,18 @@ from app.bot.handlers.notes import (
     check_notes_in_message,
 )
 from app.bot.handlers.import_rose import importfromrose_command
+from app.bot.handlers.business import (
+    handle_business_connection,
+    handle_business_message,
+    business_command,
+    biz_callback,
+    bizrules_command,
+    bizadd_command,
+    bizdel_command,
+    bizgreeting_command,
+    bizaway_command,
+    bizstatus_command,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +146,8 @@ _COMMANDS = [
     BotCommand("filters", "List active filters"),
     BotCommand("stop", "Remove an auto-reply filter"),
     BotCommand("importfromrose", "Migrate blacklist/filters/notes from a CSV"),
+    BotCommand("biz", "Telegram Business dashboard and auto-replies"),
+    BotCommand("business", "Telegram Business dashboard and auto-replies"),
 ]
 
 _GROUP_COMMANDS = [c for c in _COMMANDS if c.command != "start"]
@@ -231,6 +246,23 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("admins", admins_command))
     app.add_handler(CommandHandler("stats", stats_command))
     app.add_handler(CommandHandler("dashboard", dashboard_command))
+
+    # ── Telegram Business Automation ──────────────────────────────────────────
+    app.add_handler(BusinessConnectionHandler(handle_business_connection))
+    app.add_handler(
+        MessageHandler(
+            ptb_filters.UpdateType.BUSINESS_MESSAGE & (ptb_filters.TEXT | ptb_filters.CAPTION),
+            handle_business_message,
+        )
+    )
+    app.add_handler(CommandHandler(["biz", "business"], business_command))
+    app.add_handler(CommandHandler(["bizrules", "bizkeywords"], bizrules_command))
+    app.add_handler(CommandHandler("bizadd", bizadd_command))
+    app.add_handler(CommandHandler("bizdel", bizdel_command))
+    app.add_handler(CommandHandler("bizgreeting", bizgreeting_command))
+    app.add_handler(CommandHandler("bizaway", bizaway_command))
+    app.add_handler(CommandHandler("bizstatus", bizstatus_command))
+    app.add_handler(CallbackQueryHandler(biz_callback, pattern=r"^biz:"))
 
     # ── Moderation Commands ─────────────────────────────────────────────────────
     app.add_handler(CommandHandler("ban", ban_command))

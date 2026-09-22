@@ -15,7 +15,7 @@ from pathlib import Path
 
 import httpx
 
-from telegram import BotCommand, BotCommandScopeAllGroupChats
+from telegram import BotCommand, BotCommandScopeAllGroupChats, Update
 from telegram.ext import (
     Application,
     ApplicationBuilder,
@@ -59,8 +59,8 @@ async def _start_delivery(app: Application) -> str:
     ("webhook" or "polling") so the health endpoint can report it.
     """
     if not settings.WEBHOOK_URL:
-        await app.updater.start_polling(bootstrap_retries=5)
-        logger.info("Delivery mode: long polling.")
+        await app.updater.start_polling(bootstrap_retries=5, allowed_updates=Update.ALL_TYPES)
+        logger.info("Delivery mode: long polling (all update types enabled).")
         return "polling"
 
     url_path = settings.WEBHOOK_PATH or "/webhook"
@@ -77,6 +77,7 @@ async def _start_delivery(app: Application) -> str:
             webhook_url=webhook_url,
             secret_token=secret,
             drop_pending_updates=False,
+            allowed_updates=Update.ALL_TYPES,
         )
     except Exception as e:
         # Usually the optional tornado dependency behind the "webhooks" extra.
@@ -85,7 +86,7 @@ async def _start_delivery(app: Application) -> str:
             'Falling back to long polling — install with pip install '
             '"python-telegram-bot[webhooks]" to enable webhooks.'
         )
-        await app.updater.start_polling()
+        await app.updater.start_polling(allowed_updates=Update.ALL_TYPES)
         return "polling"
 
     logger.info(

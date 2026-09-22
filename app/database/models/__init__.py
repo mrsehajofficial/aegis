@@ -5,6 +5,7 @@ from app.database.models.warning import Warning
 from app.database.models.filter import Filter
 from app.database.models.audit_log import AuditLog
 from app.database.models.protection import Blacklist, Note
+from app.database.models.business import BusinessConnection, BusinessRule
 
 __all__ = [
     "Group",
@@ -15,4 +16,7 @@ __all__ = [
     "AuditLog",
     "Blacklist",
     "Note",
+    "BusinessConnection",
+    "BusinessRule",
 ]
+

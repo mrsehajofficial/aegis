@@ -96,11 +96,21 @@ def build_help_text() -> str:
         "/info [reply|@user|id] — User profile and role\n"
         "/admins — List group administrators\n\n"
 
+        "<b>Telegram Business</b> <i>(private chat)</i>\n"
+        "/biz or /business — Business dashboard & toggles\n"
+        "/bizrules — View active auto-reply keywords\n"
+        "/bizadd [keyword] [response] — Add/update a keyword response\n"
+        "/bizdel [keyword] — Remove a keyword rule\n"
+        "/bizgreeting [text|off] — Set or toggle greeting message\n"
+        "/bizaway [text|off] — Set or toggle out-of-office message\n"
+        "/bizstatus — Diagnostics for Telegram Business\n\n"
+
         "<b>Admin</b> <i>(admins only)</i>\n"
         "/logs — Recent moderation log\n\n"
 
         "<i>Commands marked (admins only) require admin or owner role.</i>"
     )
+
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
