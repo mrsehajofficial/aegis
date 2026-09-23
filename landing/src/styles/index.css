@@ -65,6 +65,23 @@ html, body {
   text-decoration: none;
 }
 
+.brand-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--signal-accent);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
+  background: var(--bg-surface);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: block;
+}
+
+.brand-logo:hover .brand-avatar {
+  transform: scale(1.08);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
+}
+
 .brand-icon {
   width: 28px;
   height: 28px;

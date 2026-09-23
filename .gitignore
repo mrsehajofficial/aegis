@@ -26,3 +26,7 @@ landing/node_modules/
 *.db-wal
 *.db-shm
 .env*
+
+# Private SEO and Ranking Documentation
+seo-ranking-notes.md
+*seo-ranking-notes*
