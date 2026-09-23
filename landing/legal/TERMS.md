@@ -17,7 +17,7 @@
 
 Last updated: **22 September 2026** · Instance operated by **Sehaj Varma**
 
-These terms cover your use of the Aegis bot in a Telegram group or private chat ("the Service") and the dashboard Mini App. By adding the bot to a group, or by taking part in a group where it is active, you agree to them. If you do not agree, remove the bot or ask a group admin to remove it.
+These terms cover your use of the Aegis bot in a Telegram group or private chat ("the Service"). By adding the bot to a group, or by taking part in a group where it is active, you agree to them. If you do not agree, remove the bot or ask a group admin to remove it.
 
 ## 1. The software and the instance are different things
 

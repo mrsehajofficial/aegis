@@ -167,11 +167,6 @@
 <td>24 h</td>
 <td>in memory, or the operator&#39;s Redis</td>
 </tr>
-<tr>
-<td>Dashboard admin check (group ID, user ID, answer)</td>
-<td>5 min</td>
-<td>avoids hammering the Telegram API</td>
-</tr>
 </tbody></table>
 <h3>Spam fingerprints</h3>
 <p>When a group has anti-spam enabled and a message is judged spam, the bot records a <strong>SHA-256 hash of the normalised message text</strong> together with the group&#39;s chat ID, for 24 hours. The message text itself is never stored, and the hash is one-way. If the operator points several instances at one Redis, those hashes and chat IDs are shared between <strong>those instances only</strong> — that is what lets a campaign caught in one group be pre-flagged in another. Turning anti-spam off withdraws the group&#39;s contributions.</p>
@@ -187,8 +182,8 @@
 <p>Nothing else: no analytics, no crash reporting, no third-party APIs, no Aegis-operated server.</p>
 <h2>6. Logs</h2>
 <p>The bot logs to standard output; verbosity is set by <code>LOG_LEVEL</code>. Log records can contain Telegram IDs, moderation reasons and — for the Telegram Business auto-reply path — the first 50 characters of the message being evaluated. Logs remain on the operator&#39;s host, and how long they are kept is decided by the operator&#39;s own log configuration (journald, Docker, hosting panel, database backups). Setting <code>LOG_LEVEL=WARNING</code> keeps markedly less.</p>
-<h2>7. The website and the dashboard</h2>
-<p>The project&#39;s landing page and the dashboard Mini App are static pages: they set <strong>no cookies</strong> and run <strong>no analytics</strong>. The pages load their fonts from Google Fonts, which means your IP address is visible to Google when a page loads. The dashboard talks to its API only to read or change group settings, and requests are authenticated with Telegram&#39;s signed <code>initData</code> — the payload is validated on the server and not stored.</p>
+<h2>7. The website</h2>
+<p>The project&#39;s landing page is a static page: it sets <strong>no cookies</strong> and runs <strong>no analytics</strong>. The page loads its fonts from Google Fonts, which means your IP address is visible to Google when the page loads.</p>
 <h2>8. Legal bases (if the GDPR or a similar law applies)</h2>
 <ul>
 <li><strong>Legitimate interests</strong> — protecting a community from spam, floods and abuse, and keeping an audit trail of moderation actions.</li>
@@ -208,7 +203,7 @@
 <h2>11. Security</h2>
 <ul>
 <li>The bot token lives in <code>.env</code>, created with <code>600</code> permissions by <code>python -m app.setup</code>, and is never written to logs in full.</li>
-<li>Webhook mode signs every request with a secret token; Mini App requests are verified with Telegram&#39;s HMAC scheme plus an <code>auth_date</code> freshness window and a live admin check through the Bot API.</li>
+<li>Webhook mode signs every request with a secret token.</li>
 <li>The database and Redis belong to the operator; controlling access to them is the operator&#39;s responsibility.</li>
 <li>No system is perfectly secure. Report a suspected issue to <strong><a href="mailto:mr.sehaj.official@gmail.com">mr.sehaj.official@gmail.com</a></strong> or through the repository&#39;s issue tracker.</li>
 </ul>

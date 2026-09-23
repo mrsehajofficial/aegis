@@ -61,7 +61,6 @@ Admin-authored text can incidentally mention people (a name inside a note, for e
 | Join-captcha state (user ID, message ID) | until solved, or the timeout (120 s default) | never written to the database |
 | Business-reply debounce and cooldowns | 2 s / 15 min | prevents reply loops |
 | Spam fingerprints (below) | 24 h | in memory, or the operator's Redis |
-| Dashboard admin check (group ID, user ID, answer) | 5 min | avoids hammering the Telegram API |
 
 ### Spam fingerprints
 
@@ -81,9 +80,9 @@ Nothing else: no analytics, no crash reporting, no third-party APIs, no Aegis-op
 
 The bot logs to standard output; verbosity is set by `LOG_LEVEL`. Log records can contain Telegram IDs, moderation reasons and — for the Telegram Business auto-reply path — the first 50 characters of the message being evaluated. Logs remain on the operator's host, and how long they are kept is decided by the operator's own log configuration (journald, Docker, hosting panel, database backups). Setting `LOG_LEVEL=WARNING` keeps markedly less.
 
-## 7. The website and the dashboard
+## 7. The website
 
-The project's landing page and the dashboard Mini App are static pages: they set **no cookies** and run **no analytics**. The pages load their fonts from Google Fonts, which means your IP address is visible to Google when a page loads. The dashboard talks to its API only to read or change group settings, and requests are authenticated with Telegram's signed `initData` — the payload is validated on the server and not stored.
+The project's landing page is a static page: it sets **no cookies** and runs **no analytics**. The page loads its fonts from Google Fonts, which means your IP address is visible to Google when the page loads.
 
 ## 8. Legal bases (if the GDPR or a similar law applies)
 
@@ -107,7 +106,7 @@ Depending on where you live, you may have the right to access, correct, delete, 
 ## 11. Security
 
 - The bot token lives in `.env`, created with `600` permissions by `python -m app.setup`, and is never written to logs in full.
-- Webhook mode signs every request with a secret token; Mini App requests are verified with Telegram's HMAC scheme plus an `auth_date` freshness window and a live admin check through the Bot API.
+- Webhook mode signs every request with a secret token.
 - The database and Redis belong to the operator; controlling access to them is the operator's responsibility.
 - No system is perfectly secure. Report a suspected issue to **mr.sehaj.official@gmail.com** or through the repository's issue tracker.
 

@@ -65,47 +65,6 @@ class Settings(BaseSettings):
     UPDATE_CHECK_ENABLED: bool = True
     UPDATE_CHECK_REPO: str = "mrsehajofficial/aegis"
 
-    # ── Mini App dashboard (optional) ─────────────────────────────────────────
-    # Public HTTPS URL of the dashboard page, used by /dashboard. If the URL has
-    # no path (e.g. "https://api.example.com") the "/miniapp" route is appended.
-    # The API may live on its own host or even its own account — in that case it
-    # only needs the same BOT_TOKEN and DATABASE_URL as the bot.
-    MINIAPP_URL: str = ""              # e.g. "https://api.example.com/miniapp"
-    # Origin the Mini App calls for API requests. Empty = same origin that served
-    # the page (the normal, simplest setup).
-    MINIAPP_API_BASE: str = ""         # e.g. "https://api.example.com"
-    # BotFather *short name* of the Mini App (Bot Settings → Configure Mini App).
-    # Required to build t.me deep links, which are the only form of Mini App
-    # button Telegram allows inside group chats.
-    MINIAPP_SHORT_NAME: str = ""       # e.g. "dashboard"
-    # Overrides the bot username used in deep links; detected automatically.
-    MINIAPP_BOT_USERNAME: str = ""
-    # Public base URL of the Mini App dashboard (the root HTTPS origin).  Used by
-    # the bot to build the /dashboard button link and by the API to resolve
-    # relative asset paths.  Set to the deployed origin in production (e.g.
-    # "https://aegistelebot.pythonanywhere.com").
-    MINIAPP_BASE_URL: str = ""
-    # Browser origins allowed to call the API. Only needed when the page and the
-    # API are served from different hosts. Comma-separated.
-    API_CORS_ORIGINS: List[str] = []
-
-    # Enforce HTTPS at the API layer (redirect HTTP -> HTTPS). Disabled by
-    # default; enable behind a TLS-terminating proxy that forwards the original
-    # scheme via X-Forwarded-Proto or similar.
-    ENABLE_HTTPS_PATH: bool = False
-
-    # Standalone API server (dashboard backend). Off by default: the bot itself
-    # never needs it. Turn on to serve the Mini App from this same process.
-    API_SERVER_ENABLED: bool = False
-    API_HOST: str = "0.0.0.0"
-    API_PORT: int = 8000
-
-    # Mini App request signing. initData older than this window is rejected, so a
-    # captured payload cannot be replayed. Set MINIAPP_AUTH_DISABLED=true ONLY for
-    # local development — it lets anyone who can reach the API edit group settings.
-    MINIAPP_AUTH_MAX_AGE: int = 86400
-    MINIAPP_AUTH_DISABLED: bool = False
-
     # ── HTTP client / proxy ────────────────────────────────────────────────────
     # python-telegram-bot uses httpx internally for all Telegram API calls.
     # httpx auto-detects proxies from HTTP_PROXY / HTTPS_PROXY / ALL_PROXY etc.
@@ -119,20 +78,6 @@ class Settings(BaseSettings):
     HTTP_READ_TIMEOUT: float = 30.0
     HTTP_WRITE_TIMEOUT: float = 30.0
     HTTP_POOL_SIZE: int = 5
-
-    @field_validator("API_CORS_ORIGINS", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v: Union[str, List[str], None]) -> List[str]:
-        if v is None or v == "":
-            return []
-        if isinstance(v, str):
-            clean = v.strip().strip("[]() ")
-            if not clean:
-                return []
-            return [x.strip().strip("\"'") for x in clean.split(",") if x.strip()]
-        if isinstance(v, (list, tuple)):
-            return [str(x).strip() for x in v if str(x).strip()]
-        return []
 
     @field_validator("SUPER_ADMIN_IDS", mode="before")
     @classmethod
