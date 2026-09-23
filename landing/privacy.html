@@ -6,7 +6,33 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="How the Aegis Telegram bot handles data: what is stored, what never leaves the operator's host, and how to have data deleted." />
-  <title>Privacy Policy // AEGIS</title>
+  <meta name="author" content="Sehaj Varma" />
+  <meta name="robots" content="index, follow" />
+  <title>Privacy Policy // AEGIS by Sehaj Varma</title>
+  <link rel="canonical" href="https://aegis.wasmer.app/privacy.html" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Aegis by Sehaj Varma" />
+  <meta property="og:title" content="Privacy Policy — Aegis by Sehaj Varma" />
+  <meta property="og:description" content="How the Aegis Telegram bot handles data: what is stored, what never leaves the operator's host, and how to have data deleted." />
+  <meta property="og:url" content="https://aegis.wasmer.app/privacy.html" />
+  <meta property="og:image" content="https://aegis.wasmer.app/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Privacy Policy — Aegis by Sehaj Varma" />
+  <meta name="twitter:description" content="How the Aegis Telegram bot handles data: what is stored, what never leaves the operator's host, and how to have data deleted." />
+  <meta name="twitter:image" content="https://aegis.wasmer.app/og-image.png" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Aegis by Sehaj Varma", "item": "https://aegis.wasmer.app/"},
+      {"@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": "https://aegis.wasmer.app/privacy.html"}
+    ]
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -149,12 +175,14 @@
 </tbody></table>
 <h3>Spam fingerprints</h3>
 <p>When a group has anti-spam enabled and a message is judged spam, the bot records a <strong>SHA-256 hash of the normalised message text</strong> together with the group&#39;s chat ID, for 24 hours. The message text itself is never stored, and the hash is one-way. If the operator points several instances at one Redis, those hashes and chat IDs are shared between <strong>those instances only</strong> — that is what lets a campaign caught in one group be pre-flagged in another. Turning anti-spam off withdraws the group&#39;s contributions.</p>
-<p>There is no central Aegis fingerprint server. The configuration options for a remote reputation feed exist in the code, but no request is ever made to one.</p>
+<p><strong>Optional shared reputation feed.</strong> When the operator sets <code>REPUTATION_FEED_URL</code>, the bot also reports each confirmed spam verdict to that endpoint. The feed receives <strong>only</strong> a salted fingerprint (<code>HMAC-SHA256(key=REPUTATION_SALT, msg=SHA-256-of-normalised-text)</code>) and a pseudonymised group token (<code>HMAC-SHA256(key=REPUTATION_SALT, msg=chat-ID)</code>). Neither the message text nor the raw chat ID is ever sent. <code>REPUTATION_SALT</code> must be set for the feed to be used — if it is empty the bot logs a warning and skips the feed. Reporting is fire-and-forget: any network or HTTP error is logged and never blocks local spam protection. The operator is responsible for choosing the feed operator and reviewing its own policy.</p>
+<p>There is no central Aegis fingerprint server operated by the project authors.</p>
 <h2>5. The only outbound connections the software makes</h2>
 <ol>
 <li><strong>Telegram Bot API</strong> (<code>api.telegram.org</code>) — required for the bot to function at all.</li>
 <li><strong>GitHub releases API</strong> (<code>api.github.com</code>) — an optional, anonymous version check while <code>UPDATE_CHECK_ENABLED</code> is true (the default). It sends no instance data; set <code>UPDATE_CHECK_ENABLED=false</code> to switch it off.</li>
 <li><strong>The operator&#39;s own Redis</strong> — only when the operator configured <code>REDIS_URL</code>, for shared flood and spam-fingerprint state.</li>
+<li><strong>The operator&#39;s chosen reputation feed</strong> — only when the operator configured <code>REPUTATION_FEED_URL</code>. The bot posts a salted fingerprint and a pseudonymised group token (see §4); no message content or raw chat IDs are sent. Set <code>REPUTATION_FEED_URL</code> to empty (the default) to disable it.</li>
 </ol>
 <p>Nothing else: no analytics, no crash reporting, no third-party APIs, no Aegis-operated server.</p>
 <h2>6. Logs</h2>

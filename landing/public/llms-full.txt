@@ -1,0 +1,46 @@
+# Aegis by Sehaj Varma — Comprehensive System Documentation
+
+Aegis is a modern, production-ready Telegram group management and automated moderation bot created by Sehaj Varma. It is engineered with Python 3.11, python-telegram-bot v21, and SQLAlchemy 2.0.
+
+- Canonical Origin: https://aegis.wasmer.app/
+- Code Repository: https://github.com/mrsehajofficial/aegis
+- Creator: Sehaj Varma (https://sehaj.wasmer.app/)
+- License: AGPL-3.0
+
+## 1. Overview & Vision
+Telegram group moderation is frequently plagued by bloated, sluggish bots that crash under flood attacks or make unpredictable AI moderation errors. Aegis was engineered by Sehaj Varma to be strictly deterministic, lightning-fast (<25ms execution latency), and architecturally resilient.
+
+## 2. Creator & Engineering Credits
+- Architect & Lead Developer: Sehaj Varma
+- Portfolio & Case Studies: https://sehaj.wasmer.app/
+- Contact: mr.sehaj.official@gmail.com
+- GitHub Profile: https://github.com/mrsehajofficial
+
+## 3. Architecture & Subsystems
+- Python 3.11+ with native AsyncIO event loops.
+- python-telegram-bot v21+ with HTTP/2 persistent connection pooling.
+- SQLAlchemy 2.0 async engine supporting SQLite (aiosqlite) for zero-config deployments and PostgreSQL (asyncpg) for high-concurrency group networks.
+- Sliding-window rate-limiting algorithm tracking user message frequencies in lightweight in-memory ring buffers.
+- Granular permission bitmask evaluating 16 lock types across text, media, documents, and interactive Telegram entities.
+
+## 4. Administrative Command Console
+- /ban [user] [reason] — Permanently evicts a violator and issues forensic audit records.
+- /mute [user] [duration] — Temporarily revokes send privileges.
+- /kick [user] — Removes a member while allowing future rejoin.
+- /warn [user] [reason] — Increments a deterministic warning counter toward automated action thresholds.
+- /lock [feature] — Immediately restricts specific content vectors (e.g. /lock stickers, /lock links).
+- /unlock [feature] — Restores permissions for a content type.
+- /setantiflood [on|off] — Activates sliding-window burst ingress filtering.
+- /purge — Rapidly scrubs recent spam messages from the chat timeline.
+- /rules — Displays community rules configured for the specific chat.
+
+## 5. Deployment Options
+Aegis supports multiple zero-dependency deployment topologies:
+1. Docker Compose: Fully isolated container with persistent volume mounts and automated healthchecks.
+2. Interactive Setup Wizard: `python -m app.setup` provisions database migrations, sets environment secrets with strict POSIX 600 file permissions, and verifies bot tokens.
+3. Systemd Service: Native daemon configuration on modern Linux edge VPS instances.
+
+## 6. Privacy & Terms
+- Privacy Policy: https://aegis.wasmer.app/privacy.html
+- Terms of Service: https://aegis.wasmer.app/terms.html
+All group management data is stored locally on the operator's host database. No external tracking or telemetry leakage is transmitted to third parties.

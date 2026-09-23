@@ -1,0 +1,44 @@
+{
+  "name": "Aegis by Sehaj Varma — The Steel Guardian of Telegram",
+  "short_name": "Aegis Bot",
+  "description": "Production-grade, deterministic Telegram group moderation bot by Sehaj Varma. Sliding-window anti-flood, granular locks, and immutable audit logs.",
+  "start_url": "https://aegis.wasmer.app/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#06090e",
+  "theme_color": "#06090e",
+  "lang": "en",
+  "categories": ["utilities", "security", "developer"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

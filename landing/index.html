@@ -2,14 +2,191 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Aegis: The steel guardian of Telegram. Production-grade, deterministic group management with anti-flood rate-limiting, granular locks, and immutable audit logs." />
-  <title>AEGIS // The Steel Guardian of Telegram</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Aegis by Sehaj Varma — The Steel Guardian of Telegram | Group Management Bot</title>
+  <meta name="description" content="Aegis by Sehaj Varma is a production-grade Telegram group management bot featuring sliding-window rate limiting, granular bitmask content locks, and forensic audit logs." />
+  <meta name="keywords" content="Sehaj Varma, Aegis, Aegis Telegram Bot, Telegram Group Management, Telegram Moderation Bot, Anti-Flood Bot, Spam Protection Telegram, python-telegram-bot, SQLAlchemy 2.0, Open Source Telegram Bot" />
+  <meta name="author" content="Sehaj Varma" />
+  <meta name="creator" content="Sehaj Varma" />
+  <meta name="publisher" content="Sehaj Varma" />
+  <meta name="application-name" content="Aegis by Sehaj Varma" />
+  <meta name="theme-color" content="#06090e" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
+  <!-- Canonical Source of Truth -->
+  <link rel="canonical" href="https://aegis.wasmer.app/" />
+
+  <!-- Preconnect & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- Favicons & Manifest -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+
+  <!-- OpenGraph (Facebook, Telegram, LinkedIn, Discord) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:site_name" content="Aegis by Sehaj Varma" />
+  <meta property="og:title" content="Aegis by Sehaj Varma — The Steel Guardian of Telegram" />
+  <meta property="og:description" content="Production-grade, deterministic Telegram group moderation bot with sliding-window anti-flood, granular bitmask locks, and immutable audit logs. Engineered by Sehaj Varma." />
+  <meta property="og:url" content="https://aegis.wasmer.app/" />
+  <meta property="og:image" content="https://aegis.wasmer.app/og-image.png" />
+  <meta property="og:image:secure_url" content="https://aegis.wasmer.app/og-image.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Aegis by Sehaj Varma — The Steel Guardian of Telegram Banner" />
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@mrsehajofficial" />
+  <meta name="twitter:creator" content="@mrsehajofficial" />
+  <meta name="twitter:title" content="Aegis by Sehaj Varma — The Steel Guardian of Telegram" />
+  <meta name="twitter:description" content="Production-grade, deterministic Telegram group moderation bot with sliding-window anti-flood and granular locks. Engineered by Sehaj Varma." />
+  <meta name="twitter:image" content="https://aegis.wasmer.app/og-image.png" />
+
+  <!-- LLM & AI Discovery -->
+  <link rel="alternate" type="text/plain" href="https://aegis.wasmer.app/llms.txt" title="LLM Context Summary" />
+
+  <!-- JSON-LD Structured Data: WebSite, SoftwareApplication, Person, FAQPage, Speakable -->
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": "https://aegis.wasmer.app/#website",
+      "url": "https://aegis.wasmer.app/",
+      "name": "Aegis by Sehaj Varma — The Steel Guardian of Telegram",
+      "alternateName": ["Aegis Bot", "Aegis Telegram Bot", "Aegis"],
+      "description": "Production-grade, deterministic Telegram group moderation bot by Sehaj Varma featuring sliding-window rate limiting, granular bitmask content locks, and forensic audit logs.",
+      "inLanguage": "en-US",
+      "publisher": {
+        "@type": "Person",
+        "name": "Sehaj Varma",
+        "url": "https://sehaj.wasmer.app/"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "@id": "https://aegis.wasmer.app/#software",
+      "name": "Aegis",
+      "alternateName": "Aegis Telegram Group Management Bot",
+      "url": "https://aegis.wasmer.app/",
+      "applicationCategory": "SecurityApplication",
+      "operatingSystem": "Linux, Docker, Telegram Platform",
+      "softwareVersion": "0.1.0",
+      "description": "A production-grade, deterministic Telegram moderation bot engineered by Sehaj Varma. Powered by Python 3.11, python-telegram-bot v21, and SQLAlchemy 2.0.",
+      "creator": {
+        "@type": "Person",
+        "name": "Sehaj Varma",
+        "jobTitle": "AI Automation Engineer & Backend Developer",
+        "url": "https://sehaj.wasmer.app/",
+        "sameAs": [
+          "https://github.com/mrsehajofficial",
+          "https://www.linkedin.com/in/mrsehajofficial/",
+          "https://www.instagram.com/sehaj.varma.official/"
+        ]
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Sehaj Varma",
+        "url": "https://sehaj.wasmer.app/"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "license": "https://github.com/mrsehajofficial/aegis/blob/main/LICENSE",
+      "codeRepository": "https://github.com/mrsehajofficial/aegis",
+      "programmingLanguage": "Python",
+      "featureList": [
+        "Sliding-Window Anti-Flood Rate Limiting",
+        "16 Granular Bitmask Content Locks",
+        "Deterministic Warning & Ban Cascades",
+        "Forensic ACID-Compliant Audit Ledger",
+        "Telegram Business Auto-Replies & Cooldowns"
+      ]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Who developed Aegis and what is its purpose?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Aegis is an open-source Telegram group management and moderation bot created and engineered by Sehaj Varma. It is built to deliver deterministic, high-speed (<25ms) group protection without unpredictable AI hallucinations or bot lag."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does Aegis's sliding-window anti-flood protection work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Aegis tracks per-user message frequencies in high-resolution memory sliding windows (e.g. 5 messages in 3000ms). Any sudden flood or spam spike triggers instantaneous restriction before impacting database queues or disrupting group discussions."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What content types can be locked with Aegis?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Aegis supports 16 granular content locks including voice notes, animated stickers, hyperlinks, media forwards, inline bot queries, and files. Locks can be toggled per group without altering admin permissions."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Aegis free and open source?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Aegis is completely open source under the AGPL-3.0 license and free to deploy. Source code is hosted on GitHub at github.com/mrsehajofficial/aegis."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do you deploy Aegis in production?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Aegis can be deployed using Docker Compose with automated health checks or configured as a native systemd daemon. An interactive setup wizard ('python -m app.setup') automatically provisions the database and sets secure environment credentials."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does Aegis handle user data and privacy?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Aegis is self-hosted and stores group moderation audit logs locally in SQLite or PostgreSQL. It transmits zero tracking telemetry or user chat data to external third parties."
+          }
+        }
+      ]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": "https://aegis.wasmer.app/",
+      "url": "https://aegis.wasmer.app/",
+      "name": "Aegis by Sehaj Varma — The Steel Guardian of Telegram",
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [".hero-title", ".hero-description", ".character-name", ".character-tagline", ".section-title"]
+      }
+    }
+  ]
+  </script>
 </head>
 <body>
+  <!-- Accessible Skip Link for Keyboard & Screen Reader Users -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <!-- Procedural SVG Grain Overlay -->
   <svg class="noise-overlay" aria-hidden="true">
     <filter id="fractal-noise">
@@ -22,19 +199,25 @@
   <div class="page-wrapper">
     <!-- Top Navigation -->
     <header class="nav-header">
-      <a href="#" class="brand-logo">
-        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          <path d="m9 12 2 2 4-4"/>
-        </svg>
-        <span>AEGIS // BOT</span>
-      </a>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <a href="/" class="brand-logo" aria-label="Aegis by Sehaj Varma — Return to Homepage">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+          <span>AEGIS // BOT</span>
+        </a>
+        <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer" class="badge-tag badge-soft nav-author-badge" title="Created by Sehaj Varma">
+          BY SEHAJ VARMA
+        </a>
+      </div>
 
-      <nav class="nav-links">
+      <nav class="nav-links" aria-label="Primary Navigation">
         <a href="#matrix" class="nav-link">THE CORE</a>
         <a href="#terminal" class="nav-link">CONSOLE</a>
         <a href="#features" class="nav-link">CAPABILITIES</a>
         <a href="#architecture" class="nav-link">DEPLOY</a>
+        <a href="#faq" class="nav-link">FAQ</a>
         <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">
           <span>GITHUB</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -54,9 +237,9 @@
 
     <!-- Mobile Drawer Overlay & Navigation Sheet -->
     <div class="mobile-drawer-overlay"></div>
-    <aside class="mobile-drawer">
+    <aside class="mobile-drawer" aria-label="Mobile Navigation">
       <div class="mobile-drawer-header">
-        <span class="badge-tag badge-accent">AEGIS // MATRIX</span>
+        <span class="badge-tag badge-accent">AEGIS // SEHAJ VARMA</span>
         <button class="mobile-close-btn" aria-label="Close menu">&times;</button>
       </div>
       <div class="mobile-drawer-links">
@@ -64,6 +247,7 @@
         <a href="#terminal" class="mobile-drawer-link">02 // CONSOLE</a>
         <a href="#features" class="mobile-drawer-link">03 // CAPABILITIES</a>
         <a href="#architecture" class="mobile-drawer-link">04 // DEPLOY</a>
+        <a href="#faq" class="mobile-drawer-link">05 // FAQ</a>
       </div>
       <div class="mobile-drawer-footer">
         <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="width: 100%; justify-content: center;">
@@ -73,6 +257,8 @@
           </svg>
         </a>
         <div style="margin-top: 1rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em;">
+          <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer" class="mobile-drawer-link" style="border-bottom: none; padding: 0.4rem 0; color: var(--signal-accent);">AUTHOR: SEHAJ VARMA</a>
+          <br />
           <a href="/privacy.html" class="mobile-drawer-link" style="border-bottom: none; padding: 0.4rem 0;">PRIVACY POLICY</a>
           <br />
           <a href="/terms.html" class="mobile-drawer-link" style="border-bottom: none; padding: 0.4rem 0;">TERMS OF SERVICE</a>
@@ -80,7 +266,7 @@
       </div>
     </aside>
 
-    <main>
+    <main id="main-content">
       <!-- Hero Section -->
       <section class="hero-section">
         <div class="hero-inner">
@@ -88,6 +274,11 @@
             <div class="badge-tag badge-accent">
               <span>✦ GUARDIAN PROTOCOL ONLINE // CORE READY</span>
             </div>
+
+            <span class="brand-sub">
+              by <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer"
+                    style="color: inherit; text-decoration: none;">Sehaj Varma</a>
+            </span>
 
             <h1 class="hero-title">
               THE STEEL<br />GUARDIAN.
@@ -138,7 +329,7 @@
             <div class="character-ring"></div>
             <div class="character-ring ring-2"></div>
             <div class="character-ring ring-3"></div>
-            <img src="/character.png" alt="Aegis guardian character" />
+            <img src="/character.png" alt="Aegis guardian character — created by Sehaj Varma" width="400" height="400" loading="eager" decoding="async" />
             <span class="portal-chip chip-1">✦ Group Moderator</span>
             <span class="portal-chip chip-2">● 99.98% Uptime</span>
             <span class="portal-chip chip-3">⚡ Sub-25ms Response</span>
@@ -156,7 +347,7 @@
       <!-- Character Showcase -->
       <section class="character-section">
         <div class="character-showcase">
-          <img src="/character.png" alt="Aegis guardian character showcase" />
+          <img src="/character.png" alt="Aegis guardian bot — engineered by Sehaj Varma" width="600" height="600" loading="lazy" decoding="async" />
         </div>
         <div class="character-caption">
           <div class="badge-tag badge-soft">THE GUARDIAN SPIRIT</div>
@@ -485,22 +676,101 @@ cd aegis && uv run python -m app.setup
           </div>
         </div>
       </section>
+
+      <!-- ── FAQ Section — matches FAQPage JSON-LD for Google rich results ── -->
+      <section id="faq" style="padding: 6rem 2rem; max-width: 1200px; margin: 0 auto;">
+        <div class="section-header">
+          <div class="badge-tag badge-soft">FIELD QUESTIONS // ANSWERED</div>
+          <h2 class="section-title">FREQUENTLY ASKED</h2>
+          <p class="section-subtitle">
+            Core questions about Aegis — who built it, how it works, and how to deploy it.
+          </p>
+        </div>
+
+        <div class="faq-grid" style="margin-top: 3rem;">
+          <div class="faq-card">
+            <h3 class="faq-question">Who developed Aegis?</h3>
+            <p class="faq-answer">
+              Aegis was created and engineered by <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer" style="color: var(--signal-accent); text-decoration: none;">Sehaj Varma</a>, an AI Automation Engineer &amp; Backend Developer from India. Source code is open on <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" style="color: var(--signal-accent); text-decoration: none;">GitHub</a>.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">How does Aegis's anti-flood protection work?</h3>
+            <p class="faq-answer">
+              Aegis tracks per-user message frequencies in high-resolution sliding memory windows (e.g. 5 messages / 3000ms). Any flood spike triggers instantaneous restriction before disrupting database queues or group discussions.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">What content types can be locked?</h3>
+            <p class="faq-answer">
+              Aegis supports 16 granular content locks including voice notes, animated stickers, hyperlinks, media forwards, inline bot queries, and files — per group, without altering admin permissions.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">Is Aegis free and open source?</h3>
+            <p class="faq-answer">
+              Yes — Aegis is fully open source under the AGPL-3.0 license. Anyone can self-host it for free. The source code is on GitHub at <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" style="color: var(--signal-accent); text-decoration: none;">github.com/mrsehajofficial/aegis</a>.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">How do I deploy Aegis in production?</h3>
+            <p class="faq-answer">
+              Run <code style="color: var(--signal-accent); font-family: var(--font-mono);">python -m app.setup</code> for the interactive wizard that provisions the database and creates secure credentials, or use <code style="color: var(--signal-accent); font-family: var(--font-mono);">docker compose up --build -d</code> for a fully containerised deployment.
+            </p>
+          </div>
+
+          <div class="faq-card">
+            <h3 class="faq-question">How does Aegis handle data and privacy?</h3>
+            <p class="faq-answer">
+              Aegis is self-hosted. Moderation audit logs are stored locally in your own SQLite or PostgreSQL database. Zero tracking telemetry or user chat data is transmitted to any external party.
+            </p>
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- Footer -->
     <footer class="footer-section">
       <div class="footer-content">
         <div>
-          <span style="color: var(--signal-accent); font-weight: 700;">AEGIS</span> // THE STEEL GUARDIAN OF TELEGRAM
-          <div style="margin-top: 0.35rem; color: var(--text-muted)">AGPL-3.0 License &bull; Python 3.11+ &bull; Deterministic Core</div>
-          <div style="margin-top: 0.6rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em;">
-            <a href="/privacy.html" style="color: var(--text-secondary); text-decoration: none;">PRIVACY POLICY</a>
-            <span style="color: var(--text-muted);"> / </span>
-            <a href="/terms.html" style="color: var(--text-secondary); text-decoration: none;">TERMS OF SERVICE</a>
+          <div style="margin-bottom: 0.5rem;">
+            <span style="color: var(--signal-accent); font-weight: 700;">AEGIS</span>
+            <span style="color: var(--text-muted);"> // THE STEEL GUARDIAN OF TELEGRAM</span>
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.4rem;">
+            Engineered by
+            <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer"
+               style="color: var(--signal-accent); text-decoration: none; font-weight: 700;">
+              SEHAJ VARMA
+            </a>
+            &mdash; AI Automation Engineer &amp; Backend Developer
+          </div>
+          <div style="color: var(--text-muted); font-size: 0.78rem; margin-bottom: 0.6rem;">
+            AGPL-3.0 License &bull; Python 3.11+ &bull; SQLAlchemy 2.0 &bull; Deterministic Core
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;">
+            <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer"
+               style="color: var(--signal-accent); text-decoration: none;">PORTFOLIO</a>
+            <a href="https://github.com/mrsehajofficial" target="_blank" rel="noopener noreferrer"
+               style="color: var(--text-secondary); text-decoration: none;">GITHUB</a>
+            <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer"
+               style="color: var(--text-secondary); text-decoration: none;">SOURCE CODE</a>
+            <a href="/privacy.html" style="color: var(--text-secondary); text-decoration: none;">PRIVACY</a>
+            <a href="/terms.html" style="color: var(--text-secondary); text-decoration: none;">TERMS</a>
           </div>
         </div>
-        <div>
-          Created with precision by <a href="https://github.com/mrsehajofficial" target="_blank" rel="noopener noreferrer" style="color: var(--signal-accent); text-decoration: none;">mrsehajofficial</a>
+        <div style="text-align: right;">
+          <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);">
+            A project by
+          </div>
+          <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer"
+             style="color: var(--signal-accent); text-decoration: none; font-weight: 700; font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.05em;">
+            SEHAJ VARMA
+          </a>
         </div>
       </div>
     </footer>

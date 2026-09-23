@@ -37,6 +37,7 @@ const PAGES = [
     out: join(landing, 'privacy.html'),
     title: 'Privacy Policy',
     badge: 'PRIVACY // DATA HANDLING',
+    slug: 'privacy.html',
     description:
       "How the Aegis Telegram bot handles data: what is stored, what never leaves the operator's host, and how to have data deleted.",
   },
@@ -45,6 +46,7 @@ const PAGES = [
     out: join(landing, 'terms.html'),
     title: 'Terms of Service',
     badge: 'TERMS // ACCEPTABLE USE',
+    slug: 'terms.html',
     description:
       'The terms that apply to the Aegis Telegram bot: acceptable use, admin responsibilities, availability and liability.',
   },
@@ -76,6 +78,7 @@ for (const page of PAGES) {
     .replaceAll('{{TITLE}}', page.title)
     .replaceAll('{{BADGE}}', page.badge)
     .replaceAll('{{DESCRIPTION}}', page.description)
+    .replaceAll('{{SLUG}}', page.slug)
     .replaceAll('{{CONTENT}}', content)
     .replaceAll('{{SOURCE_FILE}}', sourceFile)
     .replaceAll('{{SOURCE_URL}}', `${REPO_URL}/${sourceFile}`)

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://aegis.wasmer.app/sitemap.xml
+Host: aegis.wasmer.app
