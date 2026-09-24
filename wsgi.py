@@ -239,15 +239,17 @@ _app_callable = _create_wsgi_app()
 
 def application(environ, start_response):
     """Main WSGI entry point invoked by PythonAnywhere."""
-    # Stats/health must stay servable even while (or before) the bot boots,
-    # so never gate them on bot startup.
+    # Stats/ping/health must stay servable even while (or before) the bot
+    # boots, so never gate them on bot startup.
     path = environ.get("PATH_INFO", "/")
-    if path not in ("/api/stats", "/health", "/healthz"):
+    if path not in ("/api/stats", "/api/ping", "/health", "/healthz"):
         start_aegis_once()
     return _app_callable(environ, start_response)
 
 
-# Start the bot as soon as the WSGI file is imported (uWSGI worker boot /
-# PythonAnywhere "Reload"), so the bot is always on without waiting for a
-# request. start_aegis_once() makes this idempotent across imports/reloads.
-start_aegis_once()
+# NOTE: the bot is intentionally NOT started at import time. Booting it here
+# blocks the single free-tier worker (heavy imports + Telegram handshake
+# compete for the one CPU) so web requests queue behind it and time out.
+# The bot starts lazily on the first non-probe request via application(),
+# and stays up afterwards. Probes (/api/ping, /api/stats, /health) never
+# trigger it.
