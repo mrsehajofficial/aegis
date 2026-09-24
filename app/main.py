@@ -180,8 +180,25 @@ async def run_bot() -> None:
             health = None
 
     try:
-        # Run until interrupted
-        await asyncio.Event().wait()
+        # Run until interrupted. The stats snapshot writer lives here too so
+        # the WSGI request path never touches the database (see
+        # app/api/snapshot_writer.py + app/api/stats.py::serve_snapshot).
+        snapshot_task: asyncio.Task | None = None
+        try:
+            from app.api.snapshot_writer import start_snapshot_task
+
+            snapshot_task = start_snapshot_task(str(Path.cwd()))
+        except Exception:
+            logger.warning("Stats snapshot writer failed to start.", exc_info=True)
+        try:
+            await asyncio.Event().wait()
+        finally:
+            if snapshot_task is not None:
+                snapshot_task.cancel()
+                try:
+                    await snapshot_task
+                except (asyncio.CancelledError, Exception):
+                    pass
     except KeyboardInterrupt:
         logger.info("Received interrupt signal. Shutting down...")
     finally:

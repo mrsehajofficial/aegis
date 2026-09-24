@@ -159,3 +159,34 @@ def serve_stats(project_dir: str, start_response) -> list:
         ],
     )
     return [body]
+
+
+SNAPSHOT_FILENAME = "stats_snapshot.json"
+
+
+def serve_snapshot(project_dir: str, start_response) -> list:
+    """Serve the pre-written snapshot file. No DB, no imports, never blocks.
+
+    The bot thread refreshes this file every 30s (see snapshot_writer).
+    If it is missing/unreadable, answer instantly with an error body so the
+    landing page falls back to simulation instead of hanging.
+    """
+    try:
+        raw = (Path(project_dir) / SNAPSHOT_FILENAME).read_bytes()
+        data = json.loads(raw)
+        if not isinstance(data, dict) or "messages_screened" not in data:
+            raise ValueError("bad snapshot shape")
+    except Exception:
+        data = _empty("snapshot_unavailable")
+
+    body = json.dumps(data).encode()
+    start_response(
+        "200 OK",
+        [
+            ("Content-Type", "application/json; charset=utf-8"),
+            ("Content-Length", str(len(body))),
+            ("Access-Control-Allow-Origin", "*"),
+            ("Cache-Control", "no-store, max-age=0"),
+        ],
+    )
+    return [body]

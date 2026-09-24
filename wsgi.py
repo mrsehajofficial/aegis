@@ -86,11 +86,11 @@ def start_aegis_once() -> None:
 
 
 def _serve_stats(start_response) -> list:
-    """Synchronous WSGI handler for GET /api/stats (delegates to app.api.stats)."""
+    """Synchronous WSGI handler for GET /api/stats (snapshot file, no DB)."""
     import logging
     import traceback
     try:
-        from app.api.stats import serve_stats
+        from app.api.stats import serve_snapshot
     except Exception:
         # The stats module itself failed to import (stale code, missing
         # __init__.py, syntax error). Return a diagnosable body instead of
@@ -108,7 +108,7 @@ def _serve_stats(start_response) -> list:
             ],
         )
         return [body]
-    return serve_stats(PROJECT_DIR, start_response)
+    return serve_snapshot(PROJECT_DIR, start_response)
 
 
 def _create_wsgi_app():
@@ -118,9 +118,26 @@ def _create_wsgi_app():
         path = environ.get("PATH_INFO", "/")
         method = environ.get("REQUEST_METHOD", "GET").upper()
 
+        # Control probe: zero imports, zero DB. If THIS hangs, the worker
+        # itself is frozen (not our code). If this answers but /api/stats
+        # hangs, the fault is in the stats path.
+        if path == "/api/ping":
+            body = b'{"ok": true}'
+            start_response(
+                "200 OK",
+                [
+                    ("Content-Type", "application/json"),
+                    ("Content-Length", str(len(body))),
+                    ("Cache-Control", "no-store, max-age=0"),
+                ],
+            )
+            return [body]
+
         # ── Real-time telemetry API ──────────────────────────────────────────
         # NOTE: do NOT start the bot for stats requests — bot boot steals the
         # single free-tier CPU and makes the first stats response time out.
+        # Served from a pre-written snapshot file (bot refreshes every 30s):
+        # the request path does NO database work and cannot wedge on a lock.
         if path == "/api/stats":
             if method == "OPTIONS":
                 # CORS preflight
