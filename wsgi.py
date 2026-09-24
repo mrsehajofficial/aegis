@@ -79,18 +79,35 @@ def start_aegis_once() -> None:
     threading.Thread(target=_run_bot, name="aegis-bot", daemon=True).start()
 
 
-# ── WSGI Adapter for FastAPI Mini App Server ──────────────────────────────────
 # ── WSGI Adapter ──────────────────────────────────────────────────────────────
-# Proxy all requests to the API server's FastAPI app (which handles /health,
-# /miniapp, /api/v1, and landing page routes), except for / which we serve
-# as the landing page directly for faster response.
-# NOTE: the standalone public stats module lives at app/api/stats.py so a
-# change here only needs a Web-tab Reload, not a full bot restart.
+# /api/stats is served by the standalone stdlib-only module app/api/stats.py
+# (no app.* imports in the request path) so it answers in milliseconds even
+# on a cold worker while the bot is still booting.
 
 
 def _serve_stats(start_response) -> list:
     """Synchronous WSGI handler for GET /api/stats (delegates to app.api.stats)."""
-    from app.api.stats import serve_stats
+    import logging
+    import traceback
+    try:
+        from app.api.stats import serve_stats
+    except Exception:
+        # The stats module itself failed to import (stale code, missing
+        # __init__.py, syntax error). Return a diagnosable body instead of
+        # hanging the worker — and log the real cause to the Error log.
+        logging.getLogger("aegis.wsgi").error(
+            "stats module import failed:\n%s", traceback.format_exc()
+        )
+        body = b'{"error": "stats_module_import_failed"}'
+        start_response(
+            "200 OK",
+            [
+                ("Content-Type", "application/json"),
+                ("Content-Length", str(len(body))),
+                ("Cache-Control", "no-store, max-age=0"),
+            ],
+        )
+        return [body]
     return serve_stats(PROJECT_DIR, start_response)
 
 
