@@ -84,101 +84,14 @@ def start_aegis_once() -> None:
 # Proxy all requests to the API server's FastAPI app (which handles /health,
 # /miniapp, /api/v1, and landing page routes), except for / which we serve
 # as the landing page directly for faster response.
-# ── Public Stats API ──────────────────────────────────────────────────────────
-async def _fetch_stats() -> dict:
-    """
-    Query the database for real-time aggregate telemetry to power the
-    landing-page stat counters.  Returns only aggregate numbers — no
-    personal or per-user data is exposed.
-    """
-    from sqlalchemy import text, func, select
-    from app.database.connection import get_session
-    from app.database.models.audit_log import AuditLog
-
-    # Actions that represent a spam/flood/moderation enforcement event.
-    # These are the exact action strings written by the bot's handlers and services.
-    THREAT_ACTIONS = (
-        # Moderation handler (moderation.py)
-        "USER_BANNED", "USER_KICKED", "USER_MUTED",
-        "WARN_LIMIT_ACTION", "PURGE",
-        # Warning service (warning_service.py)
-        "WARNING_ISSUED",
-        # Captcha enforcement (captcha.py)
-        "CAPTCHA_KICK", "CAPTCHA_BAN",
-        # Anti-spam / flood (logged via services/logging.py)
-        "FLOOD_MUTE", "FLOOD_BAN", "FLOOD_RESTRICT",
-        "SPAM_DELETE", "SPAM_MUTE", "SPAM_BAN",
-        "BLACKLIST_DELETE", "LINK_DELETE",
-    )
-
-    t_start = time.perf_counter()
-    try:
-        async with get_session() as session:
-            # Total audit entries = messages processed by the bot
-            total_result = await session.execute(
-                select(func.count()).select_from(AuditLog)
-            )
-            total = total_result.scalar() or 0
-
-            # Threat actions = spam / flood interceptions
-            threat_result = await session.execute(
-                select(func.count())
-                .select_from(AuditLog)
-                .where(AuditLog.action.in_(THREAT_ACTIONS))
-            )
-            threats = threat_result.scalar() or 0
-
-        latency_ms = round((time.perf_counter() - t_start) * 1000, 1)
-    except Exception:
-        # If the DB is unreachable just return zeros so the frontend
-        # gracefully falls back to its local simulation.
-        return {"messages_screened": 0, "spam_intercepted": 0,
-                "avg_latency_ms": 0, "uptime_pct": 0.0, "error": "db_unavailable"}
-
-    # Uptime: the bot process start is recorded in health.py; import it if
-    # available, otherwise fall back to a high-availability figure.
-    try:
-        from app.bot.health import _STARTED_AT
-        uptime_seconds = time.time() - _STARTED_AT
-        # Express as a percentage of a 30-day rolling window
-        uptime_pct = min(round((uptime_seconds / (30 * 86400)) * 100, 2), 99.99)
-        # If the process just started, show a plausible historical figure
-        if uptime_pct < 90.0:
-            uptime_pct = 99.98
-    except ImportError:
-        uptime_pct = 99.98
-
-    return {
-        "messages_screened": total,
-        "spam_intercepted": threats,
-        "avg_latency_ms": latency_ms,
-        "uptime_pct": uptime_pct,
-    }
+# NOTE: the standalone public stats module lives at app/api/stats.py so a
+# change here only needs a Web-tab Reload, not a full bot restart.
 
 
 def _serve_stats(start_response) -> list:
-    """Synchronous WSGI handler for GET /api/stats."""
-    try:
-        data = asyncio.run(_fetch_stats())
-    except RuntimeError:
-        # Already inside a running loop (shouldn't happen under WSGI, but guard)
-        import concurrent.futures
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-            data = pool.submit(asyncio.run, _fetch_stats()).result(timeout=12)
-
-    body = json.dumps(data).encode()
-    start_response(
-        "200 OK",
-        [
-            ("Content-Type", "application/json; charset=utf-8"),
-            ("Content-Length", str(len(body))),
-            # Allow the landing page (same origin) and open CORS for
-            # any external monitoring tools that might poll this.
-            ("Access-Control-Allow-Origin", "*"),
-            ("Cache-Control", "no-store, max-age=0"),
-        ],
-    )
-    return [body]
+    """Synchronous WSGI handler for GET /api/stats (delegates to app.api.stats)."""
+    from app.api.stats import serve_stats
+    return serve_stats(PROJECT_DIR, start_response)
 
 
 def _create_wsgi_app():
@@ -266,72 +179,25 @@ def _create_wsgi_app():
             start_response("404 Not Found", [("Content-Type", "text/plain")])
             return [b"Not found"]
 
-        # Everything else goes to the API server's FastAPI app via ASGI bridge.
-        # FastAPI is an ASGI app (scope, receive, send), not WSGI (environ, start_response).
-        # We construct the ASGI scope from the WSGI environ and run it in a one-shot event loop.
-        query_string = environ.get("QUERY_STRING", "").encode("latin-1")
-        method = environ.get("REQUEST_METHOD", "GET")
-        headers = []
-        for key, value in environ.items():
-            if key.startswith("HTTP_"):
-                header_name = key[5:].replace("_", "-").lower().encode("latin-1")
-                headers.append((header_name, str(value).encode("latin-1")))
-            elif key == "CONTENT_TYPE" and value:
-                headers.append((b"content-type", str(value).encode("latin-1")))
-            elif key == "CONTENT_LENGTH" and value:
-                headers.append((b"content-length", str(value).encode("latin-1")))
-
-        body_file = environ.get("wsgi.input")
-        try:
-            content_length = int(environ.get("CONTENT_LENGTH", 0) or 0)
-        except ValueError:
-            content_length = 0
-        body_bytes = body_file.read(content_length) if body_file and content_length > 0 else b""
-
-        scope = {
-            "type": "http",
-            "asgi": {"version": "3.0"},
-            "http_version": "1.1",
-            "method": method,
-            "path": path,
-            "raw_path": path.encode("latin-1"),
-            "query_string": query_string,
-            "headers": headers,
-        }
-
-        read_done = False
-
-        async def receive():
-            nonlocal read_done
-            if not read_done:
-                read_done = True
-                return {"type": "http.request", "body": body_bytes, "more_body": False}
-            return {"type": "http.request", "body": b"", "more_body": False}
-
-        status_code = [500]
-        response_headers = []
-        response_body = []
-
-        async def send(message):
-            if message["type"] == "http.response.start":
-                status_code[0] = message["status"]
-                for k, v in message.get("headers", []):
-                    response_headers.append((k.decode("latin-1"), v.decode("latin-1")))
-            elif message["type"] == "http.response.body":
-                b = message.get("body", b"")
-                if b:
-                    response_body.append(b)
-
-        # asyncio.run(api_app(scope, receive, send))
-
-        status_line = f"{status_code[0]} OK" if status_code[0] == 200 else f"{status_code[0]} Status"
-        start_response(status_line, response_headers)
-        return response_body
+        # No API app is mounted here. The old ASGI bridge referenced an
+        # undefined `api_app` (it was commented out), which made every
+        # non-static route silently return an EMPTY 500. Fail loudly instead.
+        import logging
+        logging.getLogger("aegis.wsgi").error(
+            "No API app mounted; returning 404 for %s %s", method, path
+        )
+        body = b'{"error": "not found"}'
+        start_response(
+            "404 Not Found",
+            [
+                ("Content-Type", "application/json"),
+                ("Content-Length", str(len(body))),
+            ],
+        )
+        return [body]
 
     return wsgi_handler
 
-
-_app_callable = _create_wsgi_app()
 
 _app_callable = _create_wsgi_app()
 

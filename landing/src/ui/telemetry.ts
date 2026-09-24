@@ -24,9 +24,9 @@ export class TelemetryEngine {
     // Show dimmed state while loading
     this.setLoadingState();
 
-    // Fetch real data immediately, then poll every 15 seconds
+    // Reduced interval: fetch real data immediately, then poll every 10 seconds
     this.fetchAndUpdate();
-    setInterval(() => this.fetchAndUpdate(), 15_000);
+    setInterval(() => this.fetchAndUpdate(), 10_000);
   }
 
   /** Called from terminal when a command triggers an intercepted event. */
@@ -55,7 +55,10 @@ export class TelemetryEngine {
       const res = await fetch('/api/stats', {
         method: 'GET',
         headers: { Accept: 'application/json' },
-        signal: AbortSignal.timeout(8_000),
+        // Keepalive lets the request finish even if the tab navigates away.
+        // No AbortSignal — we WANT the server to complete the response.
+        keepalive: true,
+        cache: 'no-store',
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
