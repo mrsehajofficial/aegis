@@ -6,9 +6,9 @@ code) so a WSGI worker can serve stats in milliseconds even when the bot
 thread holds the async engine, the DB is locked, or app imports would be
 slow on a cold worker.
 
-Reads aggregate counts from the SQLite database with immutable-mode URIs
-(read-only, shared cache, short busy timeout) so a stats request can never
-block on the bot's write lock.
+Reads aggregate counts from the SQLite database in read-only mode with a
+short busy timeout so a stats request can never block on the bot's
+write lock (the bot runs in WAL mode, so readers never block the writer).
 """
 from __future__ import annotations
 
@@ -40,8 +40,27 @@ THREAT_ACTIONS = (
 _BUSY_TIMEOUT_MS = 1500
 
 
+def _load_dotenv(project_dir: str) -> None:
+    """Minimal .env parser — os.environ only, no pydantic import in request path."""
+    env_file = Path(project_dir) / ".env"
+    try:
+        if not env_file.is_file():
+            return
+        for line in env_file.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, val = line.partition("=")
+            key = key.strip()
+            if key and key not in os.environ:
+                os.environ[key] = val.strip().strip("\"'")
+    except Exception:
+        pass
+
+
 def resolve_sqlite_path(project_dir: str) -> Path | None:
-    """Resolve the SQLite file from DATABASE_URL without importing app code."""
+    """Resolve the SQLite file from DATABASE_URL (env or .env) without app imports."""
+    _load_dotenv(project_dir)
     url = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./aegis.db")
     if "sqlite" not in url:
         return None  # Postgres deployment — file path not applicable
@@ -70,11 +89,11 @@ def fetch_stats(project_dir: str) -> dict:
         if not db_path.exists():
             return _empty("db_missing")
 
-        # immutable=1 forces a read-only snapshot: SQLite never takes the
-        # write lock, so this cannot wedge behind the bot's transaction,
-        # and the bot's writes cannot be blocked by us either.
+        # mode=ro (NOT immutable): the bot runs in WAL mode, so an immutable
+        # snapshot would go stale or fail to open. mode=ro takes no write
+        # lock and coexists with the bot's writer via WAL.
         uri = (
-            f"file:{db_path}?mode=ro&immutable=1"
+            f"file:{db_path}?mode=ro"
             f"&cache=shared&_txlock=deferred&busy_timeout={_BUSY_TIMEOUT_MS}"
         )
         conn = sqlite3.connect(uri, uri=True, timeout=_BUSY_TIMEOUT_MS / 1000,

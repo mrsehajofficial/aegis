@@ -102,8 +102,9 @@ def _create_wsgi_app():
         method = environ.get("REQUEST_METHOD", "GET").upper()
 
         # ── Real-time telemetry API ──────────────────────────────────────────
+        # NOTE: do NOT start the bot for stats requests — bot boot steals the
+        # single free-tier CPU and makes the first stats response time out.
         if path == "/api/stats":
-            start_aegis_once()
             if method == "OPTIONS":
                 # CORS preflight
                 start_response(
@@ -204,7 +205,11 @@ _app_callable = _create_wsgi_app()
 
 def application(environ, start_response):
     """Main WSGI entry point invoked by PythonAnywhere."""
-    start_aegis_once()
+    # Stats/health must stay servable even while (or before) the bot boots,
+    # so never gate them on bot startup.
+    path = environ.get("PATH_INFO", "/")
+    if path not in ("/api/stats", "/health", "/healthz"):
+        start_aegis_once()
     return _app_callable(environ, start_response)
 
 
