@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<!-- Static error page. Hosts pick this up by convention: static-web-server
+     (--page404 404.html), nginx (error_page 404 /404.html), GitHub Pages,
+     Netlify and Cloudflare Pages all serve a root 404.html automatically.
+     Preview it locally at http://localhost:5173/404.html — Vite's own dev
+     server answers unknown paths with a bare empty 404 body, so this file is
+     what a real host serves for unmatched routes. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>404 — Route Not Found // AEGIS by Sehaj Varma</title>
+  <meta name="description" content="Aegis returned 404: this route is not in the guardian's registry. Jump back to the landing page, the console, the docs, or the source code." />
+  <meta name="author" content="Sehaj Varma" />
+  <meta name="application-name" content="Aegis Telegram Bot" />
+  <meta name="theme-color" content="#06090e" />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- An error page answers arbitrary, often mistyped and sometimes hostile
+       URLs. Keep it out of the index entirely (hosts that serve 404.html with a
+       200 status would otherwise let broken URLs accumulate as thin pages) and
+       tell crawlers not to chase the dead link further. -->
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="googlebot" content="noindex, nofollow, noarchive" />
+
+  <!-- Favicons & Manifest -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+
+  <!-- Preconnect & Fonts (same non-blocking pattern as index.html) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" /></noscript>
+</head>
+<body>
+  <!-- Procedural SVG Grain Overlay -->
+  <svg class="noise-overlay" aria-hidden="true">
+    <filter id="fractal-noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.15 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#fractal-noise)" />
+  </svg>
+
+  <div class="page-wrapper">
+    <header class="legal-header">
+      <a href="/" class="brand-logo" aria-label="Aegis by Sehaj Varma — back to the landing page">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+        <span>AEGIS // 404</span>
+      </a>
+      <nav class="legal-nav" aria-label="Error page navigation">
+        <a href="/">HOME</a>
+        <a href="/#terminal">CONSOLE</a>
+        <a href="/privacy.html">PRIVACY</a>
+        <a href="/terms.html">TERMS</a>
+      </nav>
+    </header>
+
+    <main class="error-shell">
+      <section class="error-intro" aria-labelledby="error-heading">
+        <picture class="error-mascot">
+          <img src="/character-320.webp" alt="Aegis guardian character — created by Sehaj Varma" width="320" height="320" loading="eager" decoding="async" />
+        </picture>
+
+        <div class="error-copy">
+          <span class="badge-tag badge-danger">404 // ROUTE NOT FOUND</span>
+          <h1 class="error-heading" id="error-heading">
+            <span class="error-code tabular">404</span>
+            <span class="error-title">No such route.</span>
+          </h1>
+          <p class="error-description">
+            The guardian checked its route registry and found nothing at this address. The
+            link is probably mistyped, bookmarked from an older build, or pointing at a page
+            that was renamed when this site was last rebuilt. Nothing is broken on your side
+            &mdash; the site just answered honestly.
+          </p>
+
+          <div class="error-actions">
+            <a href="/" class="btn btn-primary">
+              <span>BACK TO LANDING</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </a>
+            <a href="/#terminal" class="btn btn-secondary">
+              <span>OPEN CONSOLE</span>
+            </a>
+            <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+              <span>SOURCE CODE</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M7 17l9.2-9.2M17 17V7H7" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <div class="error-grid">
+        <!-- Request trace. The first line is filled in by src/pages/error.ts and
+             stays hidden until then, so a visitor without JavaScript sees a
+             complete response trace instead of an empty placeholder. -->
+        <div class="terminal-window error-terminal">
+          <div class="terminal-header">
+            <div class="terminal-dots" aria-hidden="true">
+              <span class="terminal-dot dot-red"></span>
+              <span class="terminal-dot dot-yellow"></span>
+              <span class="terminal-dot dot-green"></span>
+            </div>
+            <span class="terminal-title">aegis@guardian:~// route lookup</span>
+          </div>
+          <div class="terminal-body">
+            <div class="terminal-line" data-error-request hidden>
+              <span class="terminal-prompt" aria-hidden="true">$</span>
+              <span class="terminal-text">curl -sI https://aegis.wasmer.app<span data-error-path>/</span></span>
+            </div>
+            <div class="terminal-line">
+              <span class="terminal-prompt" aria-hidden="true">&gt;</span>
+              <span class="terminal-output danger">HTTP/2 404</span>
+            </div>
+            <div class="terminal-line">
+              <span class="terminal-prompt" aria-hidden="true">&gt;</span>
+              <span class="terminal-output">content-type: text/html; charset=utf-8</span>
+            </div>
+            <div class="terminal-line">
+              <span class="terminal-prompt" aria-hidden="true">&gt;</span>
+              <span class="terminal-output">x-aegis-guardian: route not in registry</span>
+            </div>
+            <div class="terminal-line">
+              <span class="terminal-prompt" aria-hidden="true">#</span>
+              <span class="terminal-output">hint: GET / for the sitemap, GET /#faq for answers</span>
+            </div>
+            <div class="terminal-line">
+              <span class="terminal-prompt" aria-hidden="true">&gt;</span>
+              <span class="terminal-output success">GET / &mdash; 200 OK &middot; serving the landing page</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Published routes. These are the only paths this site actually
+             serves, so they double as an honest sitemap for a lost visitor. -->
+        <div class="tactical-card">
+          <h2 class="error-card-title">Live routes</h2>
+          <ul class="error-route-list">
+            <li>
+              <a href="/">
+                <span class="error-route-path">/</span>
+                <span class="error-route-label">Landing &amp; feature overview</span>
+              </a>
+            </li>
+            <li>
+              <a href="/#terminal">
+                <span class="error-route-path">/#terminal</span>
+                <span class="error-route-label">Interactive command console</span>
+              </a>
+            </li>
+            <li>
+              <a href="/#features">
+                <span class="error-route-path">/#features</span>
+                <span class="error-route-label">Anti-flood &amp; content locks</span>
+              </a>
+            </li>
+            <li>
+              <a href="/#architecture">
+                <span class="error-route-path">/#architecture</span>
+                <span class="error-route-label">Self-hosting &amp; deployment</span>
+              </a>
+            </li>
+            <li>
+              <a href="/#faq">
+                <span class="error-route-path">/#faq</span>
+                <span class="error-route-label">Common questions</span>
+              </a>
+            </li>
+            <li>
+              <a href="/privacy.html">
+                <span class="error-route-path">/privacy.html</span>
+                <span class="error-route-label">What data the bot stores</span>
+              </a>
+            </li>
+            <li>
+              <a href="/terms.html">
+                <span class="error-route-path">/terms.html</span>
+                <span class="error-route-label">Acceptable use &amp; terms</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Status codes a static host can answer with, so a developer who landed
+           here from a script or a health check knows which one they hit. -->
+      <section class="error-notes" aria-label="What the status code means">
+        <div class="tactical-card error-note">
+          <span class="error-note-code">404</span>
+          <span class="error-note-name">Not Found</span>
+          <p>The path is not in this site's registry. This is the page you are looking at.</p>
+        </div>
+        <div class="tactical-card error-note">
+          <span class="error-note-code">405</span>
+          <span class="error-note-name">Method Not Allowed</span>
+          <p>This host serves documents, not an API. POST and PUT are rejected before routing.</p>
+        </div>
+        <div class="tactical-card error-note">
+          <span class="error-note-code">5xx</span>
+          <span class="error-note-name">Upstream Unavailable</span>
+          <p>Live stats come from a separate free-tier host that cold-starts; a retry usually clears it.</p>
+        </div>
+      </section>
+
+      <p class="error-retry">
+        Transient upstream failure?
+        <a href="/" data-error-retry>Retry this request</a>
+        &mdash; you can also
+        <a href="https://github.com/mrsehajofficial/aegis/issues" target="_blank" rel="noopener noreferrer">report a broken link</a>
+        and it will be fixed in the next deploy.
+      </p>
+    </main>
+
+    <footer class="footer-section">
+      <div class="footer-content">
+        <div>
+          <div style="margin-bottom: 0.5rem;">
+            <span style="color: var(--signal-accent); font-weight: 700;">AEGIS</span>
+            <span style="color: var(--text-muted);"> // TELEGRAM GROUP MANAGEMENT &amp; MODERATION</span>
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.4rem;">
+            Created &amp; maintained by
+            <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer"
+               style="color: var(--signal-accent); font-weight: 700;">
+              SEHAJ VARMA
+            </a>
+            &mdash; AI Automation Engineer &amp; Backend Developer
+          </div>
+          <div class="footer-links" style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;">
+            <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer"
+               style="color: var(--signal-accent);">PORTFOLIO</a>
+            <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer"
+               style="color: var(--text-secondary);">SOURCE CODE</a>
+            <a href="/privacy.html" style="color: var(--text-secondary);">PRIVACY</a>
+            <a href="/terms.html" style="color: var(--text-secondary);">TERMS</a>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.4rem;">
+            Status
+          </div>
+          <span class="badge-tag badge-danger">404 // NOT FOUND</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="/src/pages/error.ts"></script>
+</body>
+</html>

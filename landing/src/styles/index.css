@@ -106,9 +106,10 @@ html, body {
   color: #fff;
 }
 
-/* Hero Section */
+/* Hero Section (LCP-critical: stable min-height reserves layout, kills CLS) */
 .hero-section {
   min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -765,4 +766,28 @@ html, body {
   font-size: 0.88rem;
   color: var(--text-secondary);
   line-height: 1.6;
+}
+
+/* Accessibility: links must not rely on color alone (Lighthouse a11y).
+   Body/footer links always carry a visible underline; nav/chip controls
+   keep their button styling but gain an underline on hover/focus. */
+.faq-answer a,
+.footer-section a,
+.character-tagline a,
+.brand-sub a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+/* Footer link row: keep the underline but tighten it for the mono caps look */
+.footer-links a,
+.footer-brand {
+  text-underline-offset: 2px;
+}
+.nav-link:hover,
+.nav-link:focus-visible,
+.mobile-drawer-link:hover,
+.mobile-drawer-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }

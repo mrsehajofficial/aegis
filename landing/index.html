@@ -18,10 +18,19 @@
   <!-- Canonical Source of Truth -->
   <link rel="canonical" href="https://aegis.wasmer.app/" />
 
-  <!-- Preconnect & Fonts -->
+  <!-- LLM & AI Discovery (llms.txt v2: describedby + markdown alternate) -->
+  <link rel="describedby" href="/llms.txt" type="text/plain" />
+  <link rel="alternate" type="text/markdown" href="/llms-full.txt" title="Markdown version of this page" />
+
+  <!-- Preconnect & Fonts (non-blocking: preload + print trick, display=swap) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" /></noscript>
+
+  <!-- LCP image preload: hero guardian (responsive WebP, matches <img> below) -->
+  <link rel="preload" as="image" type="image/webp" imagesrcset="/character-400.webp 400w, /character-800.webp 800w" imagesizes="(max-width: 900px) 78vw, 400px" fetchpriority="high" />
 
   <!-- Favicons & Manifest -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -52,7 +61,9 @@
   <meta name="twitter:image" content="https://aegis.wasmer.app/og-image.png" />
 
   <!-- LLM & AI Discovery -->
-  <link rel="alternate" type="text/plain" href="https://aegis.wasmer.app/llms.txt" title="LLM Context Summary" />
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Context Summary" />
+  <link rel="describedby" href="/llms.txt" type="text/plain" />
+  <link rel="alternate" type="text/markdown" href="/llms-full.txt" title="Markdown version of this page" />
 
   <!-- JSON-LD Structured Data: WebSite, SoftwareApplication, Person, FAQPage, Speakable -->
   <script type="application/ld+json">
@@ -224,7 +235,7 @@
     <header class="nav-header">
       <div style="display: flex; align-items: center; gap: 0.75rem;">
         <a href="/" class="brand-logo" aria-label="Aegis by Sehaj Varma — Return to Homepage">
-          <img src="/character.png" alt="Aegis character mascot by Sehaj Varma" class="brand-avatar" width="32" height="32" />
+          <img src="/character-32.webp" alt="Aegis character mascot by Sehaj Varma" class="brand-avatar" width="32" height="32" loading="eager" decoding="async" fetchpriority="low" />
           <span>AEGIS // BOT</span>
         </a>
         <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer" class="badge-tag badge-soft nav-author-badge" title="Created by Sehaj Varma">
@@ -297,7 +308,7 @@
 
             <span class="brand-sub">
               by <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer"
-                    style="color: inherit; text-decoration: none;">Sehaj Varma</a>
+                    style="color: inherit;">Sehaj Varma</a>
             </span>
 
             <h1 class="hero-title">
@@ -344,12 +355,15 @@
             </div>
           </div>
 
-          <!-- Character Portal -->
+          <!-- Character Portal (LCP image: responsive WebP + PNG fallback) -->
           <div class="character-portal">
             <div class="character-ring"></div>
             <div class="character-ring ring-2"></div>
             <div class="character-ring ring-3"></div>
-            <img src="/character.png" alt="Aegis guardian character — created by Sehaj Varma" width="400" height="400" loading="eager" decoding="async" />
+            <picture>
+              <source type="image/webp" srcset="/character-400.webp 400w, /character-800.webp 800w" sizes="(max-width: 900px) 78vw, 400px" />
+              <img src="/character-400.png" srcset="/character-400.png 400w, /character-800.webp 800w" sizes="(max-width: 900px) 78vw, 400px" alt="Aegis guardian character — created by Sehaj Varma" width="400" height="400" loading="eager" decoding="async" fetchpriority="high" />
+            </picture>
             <span class="portal-chip chip-1">✦ Group Moderator</span>
             <span class="portal-chip chip-2">● 99.98% Uptime</span>
             <span class="portal-chip chip-3">⚡ Sub-25ms Response</span>
@@ -364,10 +378,13 @@
         </div>
       </section>
 
-      <!-- Character Showcase -->
+      <!-- Character Showcase (below the fold: lazy responsive image) -->
       <section class="character-section">
         <div class="character-showcase">
-          <img src="/character.png" alt="Aegis guardian bot mascot — created by Sehaj Varma" width="600" height="600" loading="lazy" decoding="async" />
+          <picture>
+            <source type="image/webp" srcset="/character-320.webp 320w, /character-400.webp 400w" sizes="(max-width: 900px) 74vw, 360px" />
+            <img src="/character-400.png" srcset="/character-320.webp 320w, /character-400.png 400w" sizes="(max-width: 900px) 74vw, 360px" alt="Aegis guardian bot mascot — created by Sehaj Varma" width="360" height="360" loading="lazy" decoding="async" fetchpriority="low" />
+          </picture>
         </div>
         <div class="character-caption">
           <div class="badge-tag badge-soft">BEHIND THE BUILD</div>
@@ -467,9 +484,12 @@
               </div>
             </div>
 
-            <!-- Scroll-Mirror Video -->
+            <!-- Scroll-Mirror Video (decorative, lazy: no preload, poster, defers 351 KiB) -->
             <div class="stage-video" data-pos="video-center">
-              <video src="/pika.mp4" muted playsinline preload="auto" disablepictureinpicture></video>
+              <video muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true" tabindex="-1" poster="/pika-poster-320.webp">
+                <source src="/pika.mp4" type="video/mp4" />
+                <track kind="captions" srclang="en" label="Decorative animation (no dialogue)" src="/pika-captions.vtt" />
+              </video>
             </div>
           </div>
         </div>
@@ -669,9 +689,9 @@ cd aegis &amp;&amp; uv run python -m app.setup
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
           <div class="tactical-card">
-            <h4 style="font-family: var(--font-mono); font-size: 1rem; margin-bottom: 1rem; color: var(--signal-accent)">
+            <h3 style="font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0; margin-bottom: 1rem; color: var(--signal-accent)">
               OPTION 01 // INTERACTIVE CLI SETUP
-            </h4>
+            </h3>
             <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.6;">
               Run our guided CLI wizard. It prompts you for your Telegram bot token, initializes your database tables, and securely creates your configuration file.
             </p>
@@ -682,9 +702,9 @@ cd aegis &amp;&amp; uv run python -m app.setup
           </div>
 
           <div class="tactical-card">
-            <h4 style="font-family: var(--font-mono); font-size: 1rem; margin-bottom: 1rem; color: var(--signal-accent-soft)">
+            <h3 style="font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0; margin-bottom: 1rem; color: var(--signal-accent-soft)">
               OPTION 02 // DOCKER COMPOSE
-            </h4>
+            </h3>
             <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.6;">
               Prefer containers? Spin up Aegis with automated healthchecks, local volume persistence for your database, and sandboxed security.
             </p>
@@ -710,7 +730,7 @@ cd aegis &amp;&amp; uv run python -m app.setup
           <div class="faq-card">
             <h3 class="faq-question">Who created Aegis?</h3>
             <p class="faq-answer">
-              Aegis was designed and engineered by <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer" style="color: var(--signal-accent); text-decoration: none; font-weight: 600;">Sehaj Varma</a>, an AI Automation Engineer &amp; Backend Developer based in India. You can explore his other engineering work on his <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer" style="color: var(--signal-accent); text-decoration: none;">Portfolio</a> or inspect the full source code on <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" style="color: var(--signal-accent); text-decoration: none;">GitHub</a>.
+              Aegis was designed and engineered by <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer" style="color: var(--signal-accent); font-weight: 600;">Sehaj Varma</a>, an AI Automation Engineer &amp; Backend Developer based in India. You can explore his other engineering work on his <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer" style="color: var(--signal-accent);">Portfolio</a> or inspect the full source code on <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" style="color: var(--signal-accent);">GitHub</a>.
             </p>
           </div>
 
@@ -731,7 +751,7 @@ cd aegis &amp;&amp; uv run python -m app.setup
           <div class="faq-card">
             <h3 class="faq-question">Is Aegis completely free and open source?</h3>
             <p class="faq-answer">
-              Yes, 100%. Aegis is released under the AGPL-3.0 open-source license. You can self-host it forever without paywalls, limits on group members, or premium tiers. The repository is on GitHub at <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" style="color: var(--signal-accent); text-decoration: none;">github.com/mrsehajofficial/aegis</a>.
+              Yes, 100%. Aegis is released under the AGPL-3.0 open-source license. You can self-host it forever without paywalls, limits on group members, or premium tiers. The repository is on GitHub at <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer" style="color: var(--signal-accent);">github.com/mrsehajofficial/aegis</a>.
             </p>
           </div>
 
@@ -763,7 +783,7 @@ cd aegis &amp;&amp; uv run python -m app.setup
           <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.4rem;">
             Created &amp; maintained by
             <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer"
-               style="color: var(--signal-accent); text-decoration: none; font-weight: 700;">
+               style="color: var(--signal-accent); font-weight: 700;">
               SEHAJ VARMA
             </a>
             &mdash; AI Automation Engineer &amp; Backend Developer
@@ -771,15 +791,15 @@ cd aegis &amp;&amp; uv run python -m app.setup
           <div style="color: var(--text-muted); font-size: 0.78rem; margin-bottom: 0.6rem;">
             AGPL-3.0 License &bull; Python 3.11+ &bull; SQLAlchemy 2.0 &bull; 100% Open Source
           </div>
-          <div style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;">
+          <div class="footer-links" style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;">
             <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer"
-               style="color: var(--signal-accent); text-decoration: none;">PORTFOLIO</a>
+               style="color: var(--signal-accent);">PORTFOLIO</a>
             <a href="https://github.com/mrsehajofficial" target="_blank" rel="noopener noreferrer"
-               style="color: var(--text-secondary); text-decoration: none;">GITHUB</a>
+               style="color: var(--text-secondary);">GITHUB</a>
             <a href="https://github.com/mrsehajofficial/aegis" target="_blank" rel="noopener noreferrer"
-               style="color: var(--text-secondary); text-decoration: none;">SOURCE CODE</a>
-            <a href="/privacy.html" style="color: var(--text-secondary); text-decoration: none;">PRIVACY</a>
-            <a href="/terms.html" style="color: var(--text-secondary); text-decoration: none;">TERMS</a>
+               style="color: var(--text-secondary);">SOURCE CODE</a>
+            <a href="/privacy.html" style="color: var(--text-secondary);">PRIVACY</a>
+            <a href="/terms.html" style="color: var(--text-secondary);">TERMS</a>
           </div>
         </div>
         <div style="text-align: right;">
@@ -787,7 +807,7 @@ cd aegis &amp;&amp; uv run python -m app.setup
             A project by
           </div>
           <a href="https://sehaj.wasmer.app/" target="_blank" rel="noopener noreferrer"
-             style="color: var(--signal-accent); text-decoration: none; font-weight: 700; font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.05em;">
+             class="footer-brand" style="color: var(--signal-accent); font-weight: 700; font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.05em;">
             SEHAJ VARMA
           </a>
         </div>

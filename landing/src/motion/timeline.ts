@@ -21,10 +21,19 @@ function positionFromPanel(panel: HTMLElement): string {
 }
 
 export function initPinnedTimelines(): void {
+  // Defense in depth: main.ts already guards with once(), but a second call
+  // would create duplicate ScrollTriggers + pins and visibly break the runway.
+  if (document.documentElement.dataset.runwayInit === '1') return;
+
   const runway = document.querySelector<HTMLElement>('.runway-section');
   const panels = gsap.utils.toArray<HTMLElement>('.stage-panel');
 
   if (!runway || panels.length === 0) return;
+
+  // Commit the guard ONLY after we know the runway exists — otherwise a
+  // below-fold lazy init that runs before the DOM is ready would set the
+  // flag and permanently disable the pin on this page view.
+  document.documentElement.dataset.runwayInit = '1';
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
@@ -45,7 +54,12 @@ export function initPinnedTimelines(): void {
     }
   };
 
-  // Master pinned timeline across the runway
+  // Master pinned timeline across the runway.
+  // NOTE: the pin target MUST be the same element as the trigger's pin
+  // ('.runway-sticky' inside .runway-section). Lenis hijacks native scroll,
+  // so ScrollTrigger needs one refresh AFTER Lenis is fully constructed and
+  // the hero image has decoded — otherwise start/end are measured against
+  // the pre-Lenis layout and the pin never engages while panels overlap.
   const masterTl = gsap.timeline({
     scrollTrigger: {
       trigger: runway,
@@ -54,21 +68,69 @@ export function initPinnedTimelines(): void {
       pin: '.runway-sticky',
       scrub: isMobile ? 0.3 : 0.8,
       anticipatePin: 1,
+      invalidateOnRefresh: true,
     },
   });
+
+  // Lenis is constructed just before this runs (see main.ts). Its smooth
+  // scroll transform changes document geometry after ScrollTrigger's initial
+  // measure, so force a re-measure on the next frame — plus once more after
+  // webfonts/images settle. Without this the pin viewport is misaligned and
+  // every stage panel renders stacked (the "content is breaking" symptom).
+  requestAnimationFrame(() => ScrollTrigger.refresh());
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(() => ScrollTrigger.refresh()).catch(() => {});
+  }
 
   const st = masterTl.scrollTrigger as ScrollTrigger | undefined;
 
   // Scroll-scrubbed playback: video frame follows the pinned progress 1:1.
+  // Lazy: only attach the per-frame ticker + video download once the runway
+  // is near the viewport (saves the 351 KiB mp4 + main-thread cost on load).
   if (st && stageVideo) {
-    gsap.ticker.add(() => {
-      if (st.isActive && stageVideo.readyState >= 2 && stageVideo.duration > 0) {
-        const target = stageVideo.duration * gsap.utils.clamp(0, 1, st.progress);
-        if (Math.abs(stageVideo.currentTime - target) > 0.02) {
-          stageVideo.currentTime = target;
-        }
+    let videoArmed = false;
+    const armVideo = () => {
+      if (videoArmed) return;
+      videoArmed = true;
+      try {
+        stageVideo.preload = 'auto';
+        stageVideo.load();
+      } catch {
+        /* ignore */
       }
-    });
+      let ticking = false;
+      gsap.ticker.add(() => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          if (st.isActive && stageVideo.readyState >= 2 && stageVideo.duration > 0) {
+            const target = stageVideo.duration * gsap.utils.clamp(0, 1, st.progress);
+            if (Math.abs(stageVideo.currentTime - target) > 0.08) {
+              try {
+                stageVideo.currentTime = target;
+              } catch {
+                /* seek failure — ignore */
+              }
+            }
+          }
+        });
+      });
+    };
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            io.disconnect();
+            armVideo();
+          }
+        },
+        { rootMargin: '600px' },
+      );
+      io.observe(runway);
+    } else {
+      armVideo();
+    }
   }
 
   // Stage 1 is initially visible

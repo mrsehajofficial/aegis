@@ -1,30 +1,25 @@
 # Aegis — Telegram Group Management Bot
 
-Aegis is an open-source, production-grade Telegram group management and moderation bot engineered and built by Sehaj Varma (https://sehaj.wasmer.app/). It provides deterministic moderation, sliding-window rate limiting, granular bitmask content locks, and forensic audit logs via SQLAlchemy 2.0.
+> Aegis is an open-source, production-grade Telegram group management and moderation bot engineered and built by Sehaj Varma. It provides deterministic moderation, sliding-window rate limiting, granular content locks, and forensic audit logs via SQLAlchemy 2.0.
 
-- Canonical URL: https://aegis.wasmer.app/
-- Source Repository: https://github.com/mrsehajofficial/aegis
-- Creator & Architect: Sehaj Varma (https://sehaj.wasmer.app/)
-- Full Documentation: https://aegis.wasmer.app/llms-full.txt
+## Docs
 
-## Author & Maintainer
-- Author: Sehaj Varma
-- Personal Portfolio: https://sehaj.wasmer.app/
-- GitHub: https://github.com/mrsehajofficial
-- LinkedIn: https://www.linkedin.com/in/mrsehajofficial/
-- Email: mr.sehaj.official@gmail.com
+- [Aegis overview](https://aegis.wasmer.app/llms-full.txt): Landing page — features, live demo console, deployment, FAQ
+- [Privacy policy](https://aegis.wasmer.app/privacy.html): What the bot stores, retention, and deletion
+- [Terms of service](https://aegis.wasmer.app/terms.html): Acceptable use and operator responsibilities
+- [Full documentation](https://aegis.wasmer.app/llms-full.txt): Architecture, commands, deployment, privacy
 
-## Key Technical Specifications
-- Language & Runtime: Python 3.11+, AsyncIO
-- Framework: python-telegram-bot (PTB) v21+
-- Persistence Layer: SQLAlchemy 2.0 Async ORM
-- Database Backends: PostgreSQL (asyncpg) or SQLite (aiosqlite)
-- License: GNU Affero General Public License v3.0 (AGPL-3.0)
-- Deployment Targets: Docker Compose, systemd, Wasmer Edge
+## Author
 
-## Core Capabilities
-1. Sliding-Window Anti-Flood: High-resolution temporal tracking of message bursts with sub-second automated throttling.
-2. Granular Content Locks: 16 distinct content classes (voice notes, animated stickers, URLs, media forwards, bot commands) toggleable without admin privilege changes.
-3. Deterministic Moderation Cascades: Non-probabilistic warnings, mutes, kicks, and bans without LLM latency or hallucination risks.
-4. Forensic Audit Trail: ACID-compliant tamper-proof moderation action logging.
-5. Telegram Business Automation: Keyword triggers, auto-replies, and out-of-office cooldowns.
+- [Sehaj Varma — portfolio](https://sehaj.wasmer.app/): Creator and architect of Aegis
+- [Source repository](https://github.com/mrsehajofficial/aegis): 100% open source (AGPL-3.0)
+
+## Specs
+
+- Python 3.11+, AsyncIO; python-telegram-bot v21+; SQLAlchemy 2.0 (PostgreSQL or SQLite)
+- Sliding-window anti-flood, 16 content locks, warn/mute/kick/ban cascades, audit trail
+- Deploy: Docker Compose, systemd, or Wasmer Edge
+
+## Optional
+
+- [Sehaj Varma on GitHub](https://github.com/mrsehajofficial): Other engineering work

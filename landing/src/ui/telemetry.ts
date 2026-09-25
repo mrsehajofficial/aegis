@@ -1,4 +1,11 @@
 export class TelemetryEngine {
+  /** Absolute API origin — the Vite dev proxy only exists locally, so
+      production (Wasmer static hosting) must call PythonAnywhere directly.
+      Relative '/api/stats' 404s on Wasmer static_web_server (see deploy logs:
+      every poll → WARN error_page status=404), then retries every 10s forever.
+      Direct cross-origin fetch works — the endpoint sends CORS `*`. */
+  private static readonly STATS_URL =
+    'https://aegistelebot.pythonanywhere.com/api/stats';
   private messagesScreened: number = 0;
   private threatsBlocked: number = 0;
   private latencyMs: number = 0;
@@ -51,15 +58,75 @@ export class TelemetryEngine {
   }
 
   private async fetchAndUpdate(): Promise<void> {
-    try {
-      const res = await fetch('/api/stats', {
-        method: 'GET',
-        headers: { Accept: 'application/json' },
-        // Keepalive lets the request finish even if the tab navigates away.
-        // No AbortSignal — we WANT the server to complete the response.
-        keepalive: true,
-        cache: 'no-store',
+    // Fast path: the HUD already ships with credible static numbers in HTML.
+    // Only hit the network when the telemetry strip is actually visible —
+    // the constructor fires at page load (LCP window) but the HUD is
+    // below the fold, so an immediate fetch just contends with LCP for
+    // Slow-4G bandwidth (PSI: /api/stats 2.6s cold-start on critical path).
+    // requestIdleCallback keeps it off the main thread even after visible.
+    if (!this.isHudVisible()) {
+      await new Promise<void>((resolve) => {
+        if (!('IntersectionObserver' in window)) {
+          setTimeout(() => resolve(), 5000);
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            if (entries.some((e) => e.isIntersecting)) {
+              io.disconnect();
+              resolve();
+            }
+          },
+          { rootMargin: '400px' },
+        );
+        const anchor = this.msgElem ?? document.body;
+        io.observe(anchor);
+        // Safety: never leave the HUD on stale numbers longer than 15s.
+        setTimeout(() => {
+          io.disconnect();
+          resolve();
+        }, 15000);
       });
+    }
+    const runFetch = async () => {
+      await this.fetchOnce();
+    };
+    const w = window as Window & { requestIdleCallback?(c: () => void, o?: object): void };
+    if (typeof w.requestIdleCallback === 'function') {
+      await new Promise<void>((resolve) => {
+        w.requestIdleCallback!(() => resolve(), { timeout: 8000 });
+      });
+    }
+    await runFetch();
+  }
+
+  private isHudVisible(): boolean {
+    const el = this.msgElem;
+    if (!el || !('IntersectionObserver' in window)) return false;
+    const r = el.getBoundingClientRect();
+    return r.top < window.innerHeight * 1.5 && r.bottom > -400;
+  }
+
+  private async fetchOnce(): Promise<void> {
+    try {
+      // Absolute URL: the Vite dev proxy (/api → pythonanywhere) only runs
+      // on localhost. Wasmer serves static files with no proxy, so a
+      // relative '/api/stats' would hit aegis.wasmer.app/api/stats (404).
+      // Direct cross-origin fetch works — the endpoint sends CORS `*`.
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 6000);
+      let res: Response;
+      try {
+        res = await fetch(TelemetryEngine.STATS_URL, {
+          method: 'GET',
+          mode: 'cors',
+          headers: { Accept: 'application/json' },
+          cache: 'no-store',
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
